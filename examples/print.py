@@ -1,6 +1,6 @@
 from pprint import pprint
 
-from hledger_tui.hledger import HLedgerApi
+from hledger_tui.hledger import HLedger
 
-ledger = HLedgerApi.print()
+ledger = HLedger.print()
 pprint(ledger)

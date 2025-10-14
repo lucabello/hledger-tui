@@ -1,16 +1,18 @@
 from typing import List, Optional
 
+from textual.binding import Binding
+from textual.coordinate import Coordinate
 from textual.widgets import DataTable
 from typing_extensions import override
 
-from hledger_tui.hledger import AccountBalance
+from hledger_tui.hledger import CategoricalBalance
 
 
 class AccountsDataTable(DataTable):
     def __init__(
         self,
+        category_name: str = "Account",
         *,
-        root_account: Optional[str] = None,
         name: Optional[str] = None,
         id: Optional[str] = None,
         classes: Optional[str] = None,
@@ -28,21 +30,30 @@ class AccountsDataTable(DataTable):
             classes=classes,
             disabled=disabled,
         )
-        self._root_account: Optional[str] = root_account
-        self._balances: List[AccountBalance] = []
+        self._category_name: str = category_name
+        self._balances: List[CategoricalBalance] = []
+        self._balance_over_time: List[CategoricalBalance] = []
 
     @override
     def on_mount(self) -> None:
         super().on_mount()
-        self.add_columns("Account", "Balance")
+        self.add_columns(self._category_name, "Balance")
 
-    def update_data(self, balances: List[AccountBalance]):
+    @property
+    def selected_account(self) -> str:
+        return self.get_cell_at(Coordinate(row=self.cursor_row, column=0))
+
+    def update_data(
+        self,
+        balances: Optional[List[CategoricalBalance]] = None,
+    ):
         """Update widget data and refresh it."""
-        self._balances = balances
+        if balances is not None:
+            self._balances = balances
         self.recreate()
 
     def recreate(self):
         """Refresh the table with data saved in the AccountsDataTable instance."""
         self.clear()
         for b in self._balances:
-            self.add_row(b.account, b.balance)
+            self.add_row(b.name, b.balance)

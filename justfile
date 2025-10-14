@@ -58,4 +58,4 @@ clean:
 # Run the app with hledger-tui
 [group("dev")]
 run:
-	textual run hledger-tui
+	uv run textual run src/hledger_tui/app.py --dev
