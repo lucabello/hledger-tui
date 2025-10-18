@@ -1,35 +1,42 @@
-from rich.console import Console
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.widgets import (
     Footer,
     Header,
     Label,
+    Switch,
     TabbedContent,
     TabPane,
 )
 
-from hledger_tui.widgets.hledger_balance import HLedgerBalance
-
-# from hledger_tui.screens.assets import AssetsScreen
+from hledger_tui.tabs.balance import HLedgerBalanceTab
 
 
 class HLedgerViewApp(App):
     TITLE = "HLedger View"
     SUB_TITLE = "Observe your finances"
 
+    # BINDINGS = [
+    #     Binding(key="1", action="switch_tab('balanceTab')", show=False),
+    #     Binding(key="2", action="switch_tab('balanceSheetTab')", show=False),
+    # ]
+
     def on_mount(self) -> None:
         self.theme = "dracula"
 
     def compose(self) -> ComposeResult:
-        yield Header()
-        with TabbedContent():
-            with TabPane("[1] Balance (bal)", id="tabBalance"):
-                yield HLedgerBalance()
-            with TabPane("[2] Balance Sheet (bs)"):
-                yield Label("1")
-                yield Label("1")
-                yield Label("1")
+        with TabbedContent(initial="balanceByAccount"):
+            with TabPane("Expenses", id="balanceByAccount"):
+                yield HLedgerBalanceTab()
+            with TabPane("Assets", id="balanceByTag"):
+                yield Label()
+                # yield HLedgerBalanceTab()
         yield Footer()
+
+    def action_switch_tab(self, tab_id: str):
+        """Switch to the tab with the specified id."""
+        tabbed_content = self.query_one(TabbedContent)
+        tabbed_content.active = tab_id
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from typing import List, Optional
 from rich.color import Color
 from textual.app import ComposeResult
 from textual.widget import Widget
+from textual.widgets import Label, Static
 from textual_plotext import PlotextPlot
 
 from textual.containers import VerticalScroll
@@ -11,13 +12,33 @@ from typing_extensions import override
 
 
 class BarPlotScroll(Widget):
+    DEFAULT_CSS = """
+    BarPlotScroll {
+        Label {
+            width: 100%;
+            color: $border;
+            text-align: center;
+            text-style: bold;
+        }
+        VerticalScroll {
+            scrollbar-size: 0 0;
+        }
+    }
+    """
+
     def compose(self) -> ComposeResult:
-        with VerticalScroll(can_focus_children=False):
+        yield Label()
+        with VerticalScroll(can_focus=False, can_focus_children=False):
             yield BarPlot()
+        yield Static()
 
     @property
     def plot(self) -> BarPlot:
         return self.get_child_by_type(VerticalScroll).get_child_by_type(BarPlot)
+
+    def update_label(self, content: str) -> None:
+        label = self.query_one(Label)
+        label.content = content
 
 
 class BarPlot(PlotextPlot):
@@ -81,15 +102,19 @@ class BarPlot(PlotextPlot):
         self.plt.bar(
             self.categories,
             self.values,
+            xside="upper",
             orientation="horizontal",
             color=self.color.triplet,
             width=0,
         )
-        self.styles.height = len(self.categories) + 3
+        self.styles.height = len(self.categories) + 1
         self.plt.grid(vertical=True)
+        self.plt.frame(False)
         if not self.values:
             return
-        self.plt.xticks(ticks=[i for i in range(0, int(max(self.values)), self.ticks_scale)])
+        self.plt.xticks(
+            ticks=[i for i in range(0, int(max(self.values)), self.ticks_scale)], xside=2
+        )
         # NOTE: The plot doesn't always update correctly when this function is called;
         # for some reason, calling self.on_mount() makes the bar plot update correctly.
         self.on_mount()

@@ -34,20 +34,6 @@ class CategoricalBalance:
         return float(self.balance.split()[-1])
 
 
-@dataclass
-class HLedgerDepth:
-    """An integer counter which is wrapped between min and max."""
-
-    max: int
-    value: int = 1
-    min: int = 1
-
-    def increment(self):
-        if self.value == self.max:
-            self.value = self.min - 1
-        self.value = self.value % self.max + 1
-
-
 class HLedgerPeriod:
     """An HLedger period based on a fixed unit (e.g., '1 month ago').
 
@@ -59,16 +45,9 @@ class HLedgerPeriod:
     # Define period units and subdivisions in order, so that one index identifies
     # one period and its related subdivisions
     PeriodUnit: TypeAlias = Literal["weeks", "months", "quarters", "years"]
-    PERIOD_UNITS: Final[List[PeriodUnit]] = ["weeks", "months", "quarters", "years"]
     PeriodSubdivision: TypeAlias = Literal["daily", "weekly", "monthly", "quarterly"]
-    PERIOD_SUBDIVISIONS: Final[List[List[PeriodSubdivision]]] = [
-        ["daily"],
-        ["weekly", "daily"],
-        ["weekly", "monthly"],
-        ["monthly", "weekly"],
-    ]
 
-    _unit: PeriodUnit
+    unit: PeriodUnit
     _offset: int
 
     def __init__(
@@ -77,47 +56,33 @@ class HLedgerPeriod:
         subdivision: PeriodSubdivision = "weekly",
         offset: int = 0,
     ):
-        self._unit = unit
-        self._subdivision = subdivision
+        self.unit = unit
+        self.subdivision = subdivision
         self._offset = offset
 
         self.subdivision_offset: int = 0
 
-    @property
-    def _unit_index(self) -> int:
-        """Index of self._unit in PERIOD_UNITS."""
-        return self.PERIOD_UNITS.index(self._unit)
-
-    @property
-    def subdivision(self) -> str:
-        """Get the appropriate subdivision for the selected period unit."""
-        allowed_subdivisions: List = self.PERIOD_SUBDIVISIONS[self._unit_index]
-        return allowed_subdivisions[self.subdivision_offset % len(allowed_subdivisions)]
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, HLedgerPeriod)
+            and self.unit == other.unit
+            and self._offset == other._offset
+        )
 
     @property
     def singular_unit(self) -> str:
         """The current unit used by the HLedgerPeriod, but in singular form."""
-        return self._unit[:-1]
+        return self.unit[:-1]
 
     @property
     def value(self) -> str:
         """HLedger-compatible period string."""
         direction: Literal["ago", "ahead"] = "ago" if self._offset <= 0 else "ahead"
         # Drop the 's' from the unit if it's 1 - not necessary for HLedger, just for aesthetics
-        pretty_unit = self._unit[:-1] if abs(self._offset) <= 1 else self._unit
+        pretty_unit = self.unit[:-1] if abs(self._offset) <= 1 else self.unit
         if self._offset == 0:
             return f"this {pretty_unit}"
         return f"{abs(self._offset)} {pretty_unit} {direction}"
-
-    def cycle_unit(self) -> None:
-        """Cyclically move to the next period unit."""
-        # If the end of the list is reached, cycle back
-        if self._unit_index + 1 >= len(self.PERIOD_UNITS):
-            self._unit = self.PERIOD_UNITS[0]
-            return
-
-        # Otherwise, move to the next time unit
-        self._unit = self.PERIOD_UNITS[self._unit_index + 1]
 
     def previous_period(self):
         """Decrease the period offset by one."""
@@ -131,19 +96,30 @@ class HLedgerPeriod:
 class HLedger:
     """Interact with HLedger to extract data from a Ledger file."""
 
+    DEFAULT_DEPTH_MIN: Final[int] = 1
     DEFAULT_DEPTH: Final[int] = 2
+    DEFAULT_DEPTH_MAX: Final[int] = 4
     DEFAULT_PERIOD: Final[HLedgerPeriod] = HLedgerPeriod()
+    DEFAULT_HLEDGER_QUERIES: ClassVar[List[str]] = [
+        "acct:expenses",
+        "not:acct:financial",
+        "not:acct:home:rent",
+        "not:acct:home:utilities",
+    ]
+    DEFAULT_HLEDGER_TAG_QUERIES: ClassVar[List[str]] = [
+        "acct:expenses",
+    ]
 
     queries: List[str]  # Series of HLedger queries
-    depth: HLedgerDepth  # The --depth to use in HLedger commands
+    depth: int  # The --depth to use in HLedger commands
     period: HLedgerPeriod
 
-    def __init__(self, queries: List[str]):
-        self.queries = queries
-        self.depth = HLedgerDepth(max=self._account_depth(), value=self.DEFAULT_DEPTH)
+    def __init__(self, queries: Optional[List[str]] = None):
+        self.queries = queries if queries is not None else self.DEFAULT_HLEDGER_QUERIES
+        self.depth = self.DEFAULT_DEPTH
         self.period = HLedgerPeriod()
 
-    def balance(self, **kwargs) -> List[CategoricalBalance]:
+    def balance(self, queries: Optional[List[str]] = None, **kwargs) -> List[CategoricalBalance]:
         """Run 'hledger balance'.
 
         Returns:
@@ -152,9 +128,32 @@ class HLedger:
         # Get the balances from HLedger
         balances: List[CategoricalBalance] = []
         raw_balances = sh.hledger.balance(  # pyright: ignore
-            self.queries,
-            depth=self.depth.value,
+            queries or self.queries,
+            depth=self.depth,
             period=self.period.value,
+            no_total=True,
+            market=True,  # Unify to one currency for simplicity
+            output_format="csv",
+            _tty_out=False,
+            **kwargs,
+        )
+        csv_reader = csv.reader(StringIO(raw_balances))
+        next(csv_reader)  # Skip the header row
+        for row in csv_reader:
+            balances.append(CategoricalBalance(*row))
+        return sorted(balances, key=lambda b: b.name)
+
+    def tag_balance(self, tag: str, **kwargs) -> List[CategoricalBalance]:
+        """Run 'hledger balance'.
+
+        Returns:
+
+        """
+        # Get the balances from HLedger
+        balances: List[CategoricalBalance] = []
+        raw_balances = sh.hledger.balance(  # pyright: ignore
+            [*self.DEFAULT_HLEDGER_TAG_QUERIES, tag],
+            depth=self.depth,
             no_total=True,
             market=True,  # Unify to one currency for simplicity
             output_format="csv",
@@ -175,7 +174,7 @@ class HLedger:
         balance_over_time: List[CategoricalBalance] = []
         raw_balances = sh.hledger.balance(  # pyright: ignore
             account,
-            depth=self.depth.value,
+            depth=self.depth,
             period=self.period.value,
             no_total=True,
             market=True,  # Unify to one currency for simplicity
@@ -208,14 +207,26 @@ class HLedger:
         # return sorted(balance_over_time, key=lambda b: b.name)
         return balance_over_time
 
-    # @staticmethod
-    # def balance_sheet(*, query: str)
-
     def _account_depth(self) -> int:
         """Return the maximum account depth for the configured query."""
-        accounts = sh.hledger.accounts(self.queries)  # pyright: ignore
+        accounts = sh.hledger.accounts(self.queries).split("\n")  # pyright: ignore
         max_depth = max(len(account.split(":")) for account in accounts) + 1
+        print(max_depth)
         return max_depth
+
+    @staticmethod
+    def accounts_depth(accounts: List[str]) -> int:
+        """Return the maximum account depth using the given accounts as query."""
+        raw_accounts = sh.hledger.accounts(accounts).split("\n")  # pyright: ignore
+        max_depth = max(len(acc.split(":")) for acc in raw_accounts) + 1
+        return max_depth
+
+    @staticmethod
+    def tags() -> List[str]:
+        """Return the existing HLedger tags."""
+        raw_tags: List[str] = sh.hledger.tags(declared=True).split("\n")  # pyright: ignore
+        tags = [t for t in raw_tags if t]
+        return tags
 
     # @staticmethod
     # def print() -> str:
@@ -223,4 +234,7 @@ class HLedger:
 
     def cycle_depth(self) -> None:
         """Cyclically increase the query depth, wrapping back to 1 after reaching the max."""
-        self.depth.increment()
+        if self.depth + 1 > self.DEFAULT_DEPTH_MAX:
+            self.depth = self.DEFAULT_DEPTH_MIN
+            return
+        self.depth += 1
