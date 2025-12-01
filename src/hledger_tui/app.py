@@ -10,6 +10,7 @@ from textual.widgets import (
 )
 
 from hledger_tui.tabs.balance import HLedgerBalanceTab
+from hledger_tui.tabs.assets import HLedgerAssetsTab
 
 
 class HLedgerViewApp(App):
@@ -29,7 +30,8 @@ class HLedgerViewApp(App):
             with TabPane("Expenses", id="balanceByAccount"):
                 yield HLedgerBalanceTab()
             with TabPane("Assets", id="balanceByTag"):
-                yield Label()
+                yield HLedgerAssetsTab()
+                # yield Label()
                 # yield HLedgerBalanceTab()
         yield Footer()
 

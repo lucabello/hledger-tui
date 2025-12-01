@@ -34,6 +34,12 @@ class CategoricalBalance:
         return float(self.balance.split()[-1])
 
 
+@dataclass
+class AccountHistoricalBalance:
+    name: str  # Name of the account
+    balances: List[CategoricalBalance]  # List of period + balance
+
+
 class HLedgerPeriod:
     """An HLedger period based on a fixed unit (e.g., '1 month ago').
 
@@ -109,6 +115,11 @@ class HLedger:
     DEFAULT_HLEDGER_TAG_QUERIES: ClassVar[List[str]] = [
         "acct:expenses",
     ]
+    DEFAULT_HLEDGER_ASSETS_QUERIES: ClassVar[List[str]] = [
+        "acct:assets",
+        "acct:liabilities",
+        "acct:budget",
+    ]
 
     queries: List[str]  # Series of HLedger queries
     depth: int  # The --depth to use in HLedger commands
@@ -118,6 +129,51 @@ class HLedger:
         self.queries = queries if queries is not None else self.DEFAULT_HLEDGER_QUERIES
         self.depth = self.DEFAULT_DEPTH
         self.period = HLedgerPeriod()
+
+    def assets(
+        self, queries: Optional[List[str]] = None, **kwargs
+    ) -> List[AccountHistoricalBalance]:
+        raw_balances = sh.hledger.balance(  # pyright: ignore
+            queries or self.queries,
+            depth=self.depth,
+            period=self.period.value,
+            no_total=True,
+            market=True,  # Unify to one currency for simplicity
+            historical=True,
+            output_format="csv",
+            daily=self.period.subdivision == "daily",
+            weekly=self.period.subdivision == "weekly",
+            monthly=self.period.subdivision == "monthly",
+            quarterly=self.period.subdivision == "quarterly",
+            yearly=self.period.subdivision == "yearly",
+            _tty_out=False,
+            **kwargs,
+        )
+        csv_reader = csv.reader(StringIO(raw_balances))
+        # Process the header row
+        header_row: bool = True
+        periods: List[str] = []
+        balances: List[AccountHistoricalBalance] = []
+        for row in csv_reader:
+            # Get the subdivision buckets from the header row
+            if header_row:
+                periods.extend(row[1:])
+                header_row = False
+            else:
+                balances.append(
+                    AccountHistoricalBalance(
+                        name=row[0],
+                        balances=[
+                            CategoricalBalance(
+                                p,
+                                row[1 + index],
+                            )
+                            for index, p in enumerate(periods)
+                        ],
+                    )
+                )
+
+        return sorted(balances, key=lambda b: b.name)
 
     def balance(self, queries: Optional[List[str]] = None, **kwargs) -> List[CategoricalBalance]:
         """Run 'hledger balance'.

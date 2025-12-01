@@ -41,6 +41,36 @@ class BarPlotScroll(Widget):
         label.content = content
 
 
+class PlotPlotScroll(Widget):
+    DEFAULT_CSS = """
+    PlotPlotScroll {
+        Label {
+            width: 100%;
+            color: $border;
+            text-align: center;
+            text-style: bold;
+        }
+        VerticalScroll {
+            scrollbar-size: 0 0;
+        }
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        yield Label()
+        with VerticalScroll(can_focus=False, can_focus_children=False):
+            yield PlotPlot()
+        yield Static()
+
+    @property
+    def plot(self) -> PlotPlot:
+        return self.get_child_by_type(VerticalScroll).get_child_by_type(PlotPlot)
+
+    def update_label(self, content: str) -> None:
+        label = self.query_one(Label)
+        label.content = content
+
+
 class BarPlot(PlotextPlot):
     categories: List[str]
     values: List[int | float]
@@ -78,7 +108,11 @@ class BarPlot(PlotextPlot):
             return 100
         if max_value < 5000:
             return 500
-        return 1000
+        if max_value < 10000:
+            return 1000
+        if max_value < 50000:
+            return 5000
+        return 10000
 
     def _update_colors(self):
         """Update the plot color; this functions is used to respond to a theme_changed event."""
@@ -106,6 +140,87 @@ class BarPlot(PlotextPlot):
             orientation="horizontal",
             color=self.color.triplet,
             width=0,
+        )
+        self.styles.height = len(self.categories) + 1
+        self.plt.grid(vertical=True)
+        self.plt.frame(False)
+        if not self.values:
+            return
+        self.plt.xticks(
+            ticks=[i for i in range(0, int(max(self.values)), self.ticks_scale)], xside=2
+        )
+        # NOTE: The plot doesn't always update correctly when this function is called;
+        # for some reason, calling self.on_mount() makes the bar plot update correctly.
+        self.on_mount()
+
+
+class PlotPlot(PlotextPlot):
+    categories: List[str]
+    values: List[int | float]
+    color_override: Optional[Color]
+    color: Color
+
+    def __init__(
+        self,
+        color: Optional[Color] = None,
+        *,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        super().__init__(name=name, id=id, classes=classes, disabled=disabled)
+        self.categories: List[str] = []
+        self.values: List[int | float] = []
+        self.color_override = color
+        self.color: Color = self.color_override or Color.parse(self.app.theme_variables["primary"])
+
+    @override
+    def on_mount(self) -> None:
+        super().on_mount()
+        self.app.theme_changed_signal.subscribe(self, lambda _: self._update_colors())
+
+    @property
+    def ticks_scale(self) -> int:
+        max_value = max(self.values)
+        if max_value < 100:
+            return 10
+        if max_value < 500:
+            return 50
+        if max_value < 1000:
+            return 100
+        if max_value < 5000:
+            return 500
+        if max_value < 10000:
+            return 1000
+        if max_value < 50000:
+            return 5000
+        return 10000
+
+    def _update_colors(self):
+        """Update the plot color; this functions is used to respond to a theme_changed event."""
+        self.color = self.color_override or Color.parse(self.app.theme_variables["primary"])
+        if self.categories:
+            self.update_data(self.categories, self.values)
+
+    def update_data(
+        self,
+        categories: List[str],
+        values: List[int | float],
+    ):
+        """Update widget data and refresh it."""
+        self.categories = categories
+        self.values = values
+        self.recreate()
+
+    def recreate(self):
+        """Refresh the bar plot with data saved in the BarPlot instance."""
+        self.plt.clear_data()
+        self.plt.plot(
+            self.categories,
+            self.values,
+            xside="upper",
+            color=self.color.triplet,
         )
         self.styles.height = len(self.categories) + 1
         self.plt.grid(vertical=True)
