@@ -1,7 +1,7 @@
 import csv
 from dataclasses import dataclass
 from io import StringIO
-from typing import ClassVar, Final, List, Literal, Optional, TypeAlias
+from typing import ClassVar, Final, List, Literal, Optional
 
 import sh
 
@@ -44,22 +44,17 @@ class HLedgerPeriod:
     """An HLedger period based on a fixed unit (e.g., '1 month ago').
 
     Args:
-        unit: The time unit used in the period
+        unit: The time unit used in the period, or None for all time
         offset: How many time units in the past (negative ints) or in the future (positive ints)
     """
 
-    # Define period units and subdivisions in order, so that one index identifies
-    # one period and its related subdivisions
-    PeriodUnit: TypeAlias = Literal["weeks", "months", "quarters", "years"]
-    PeriodSubdivision: TypeAlias = Literal["daily", "weekly", "monthly", "quarterly"]
-
-    unit: PeriodUnit
+    unit: str | None
     _offset: int
 
     def __init__(
         self,
-        unit: PeriodUnit = "months",
-        subdivision: PeriodSubdivision = "weekly",
+        unit: str | None = "months",
+        subdivision: str = "weekly",
         offset: int = 0,
     ):
         self.unit = unit
@@ -78,11 +73,15 @@ class HLedgerPeriod:
     @property
     def singular_unit(self) -> str:
         """The current unit used by the HLedgerPeriod, but in singular form."""
+        if self.unit is None:
+            return "all time"
         return self.unit[:-1]
 
     @property
-    def value(self) -> str:
-        """HLedger-compatible period string."""
+    def value(self) -> str | None:
+        """HLedger-compatible period string, or None for all time."""
+        if self.unit is None:
+            return None
         direction: Literal["ago", "ahead"] = "ago" if self._offset <= 0 else "ahead"
         # Drop the 's' from the unit if it's 1 - not necessary for HLedger, just for aesthetics
         pretty_unit = self.unit[:-1] if abs(self._offset) <= 1 else self.unit
@@ -133,20 +132,27 @@ class HLedger:
     def assets(
         self, queries: Optional[List[str]] = None, **kwargs
     ) -> List[AccountHistoricalBalance]:
+        # Build hledger command arguments
+        hledger_args = {
+            "depth": self.depth,
+            "no_total": True,
+            "market": True,  # Unify to one currency for simplicity
+            "historical": True,
+            "output_format": "csv",
+            "daily": self.period.subdivision == "daily",
+            "weekly": self.period.subdivision == "weekly",
+            "monthly": self.period.subdivision == "monthly",
+            "quarterly": self.period.subdivision == "quarterly",
+            "yearly": self.period.subdivision == "yearly",
+            "_tty_out": False,
+        }
+        # Only add period if it's not None (all time)
+        if self.period.value is not None:
+            hledger_args["period"] = self.period.value
+
         raw_balances = sh.hledger.balance(  # pyright: ignore
             queries or self.queries,
-            depth=self.depth,
-            period=self.period.value,
-            no_total=True,
-            market=True,  # Unify to one currency for simplicity
-            historical=True,
-            output_format="csv",
-            daily=self.period.subdivision == "daily",
-            weekly=self.period.subdivision == "weekly",
-            monthly=self.period.subdivision == "monthly",
-            quarterly=self.period.subdivision == "quarterly",
-            yearly=self.period.subdivision == "yearly",
-            _tty_out=False,
+            **hledger_args,
             **kwargs,
         )
         csv_reader = csv.reader(StringIO(raw_balances))
@@ -183,14 +189,21 @@ class HLedger:
         """
         # Get the balances from HLedger
         balances: List[CategoricalBalance] = []
+        # Build hledger command arguments
+        hledger_args = {
+            "depth": self.depth,
+            "no_total": True,
+            "market": True,  # Unify to one currency for simplicity
+            "output_format": "csv",
+            "_tty_out": False,
+        }
+        # Only add period if it's not None (all time)
+        if self.period.value is not None:
+            hledger_args["period"] = self.period.value
+
         raw_balances = sh.hledger.balance(  # pyright: ignore
             queries or self.queries,
-            depth=self.depth,
-            period=self.period.value,
-            no_total=True,
-            market=True,  # Unify to one currency for simplicity
-            output_format="csv",
-            _tty_out=False,
+            **hledger_args,
             **kwargs,
         )
         csv_reader = csv.reader(StringIO(raw_balances))
@@ -242,20 +255,27 @@ class HLedger:
             - historical=True: cumulative balance at end of each month
         """
         balance_over_time: List[CategoricalBalance] = []
+        # Build hledger command arguments
+        hledger_args = {
+            "depth": self.depth,
+            "no_total": True,
+            "market": True,  # Unify to one currency for simplicity
+            "historical": historical,
+            "output_format": "csv",
+            "daily": self.period.subdivision == "daily",
+            "weekly": self.period.subdivision == "weekly",
+            "monthly": self.period.subdivision == "monthly",
+            "quarterly": self.period.subdivision == "quarterly",
+            "yearly": self.period.subdivision == "yearly",
+            "_tty_out": False,
+        }
+        # Only add period if it's not None (all time)
+        if self.period.value is not None:
+            hledger_args["period"] = self.period.value
+
         raw_balances = sh.hledger.balance(  # pyright: ignore
             account,
-            depth=self.depth,
-            period=self.period.value,
-            no_total=True,
-            market=True,  # Unify to one currency for simplicity
-            historical=historical,
-            output_format="csv",
-            daily=self.period.subdivision == "daily",
-            weekly=self.period.subdivision == "weekly",
-            monthly=self.period.subdivision == "monthly",
-            quarterly=self.period.subdivision == "quarterly",
-            yearly=self.period.subdivision == "yearly",
-            _tty_out=False,
+            **hledger_args,
             **kwargs,
         )
         csv_reader = csv.reader(StringIO(raw_balances))

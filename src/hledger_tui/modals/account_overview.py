@@ -26,6 +26,7 @@ class ModalAccountOverview(ModalScreen):
             priority=True,
             show=False,
         ),
+        Binding("a", "set_period_unit_all_time", "All Time", priority=True),
         Binding("w", "set_period_unit('weeks')", "Weeks", priority=True),
         Binding("m", "set_period_unit('months')", "Months", priority=True),
         Binding("y", "set_period_unit('years')", "Years", priority=True),
@@ -90,7 +91,7 @@ class ModalAccountOverview(ModalScreen):
             balances=balance_over_time,
             table_title=f"{self.hledger.period.subdivision} balance".title(),
             table_subtitle="",
-            plot_label=f"{self._selected_account} ({self.hledger.period.value})",
+            plot_label=f"{self._selected_account} ({self.hledger.period.value or 'All Time'})",
         )
 
     def action_close_historical_modal(self):
@@ -101,6 +102,11 @@ class ModalAccountOverview(ModalScreen):
     def action_set_period_unit(self, period_unit: str):
         """Set the unit for the HLedgerPeriod and refresh."""
         self.hledger.period.unit = period_unit  # pyright: ignore
+        self.update_data()
+
+    def action_set_period_unit_all_time(self):
+        """Set the period to all time and refresh."""
+        self.hledger.period.unit = None
         self.update_data()
 
     def action_set_period_subdivision(self, period_subdivision: str):

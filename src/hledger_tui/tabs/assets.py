@@ -15,9 +15,11 @@ from hledger_tui.widgets.hledger_assets import HLedgerAssets
 
 class HLedgerAssetsTab(Widget):
     BINDINGS = [
+        ("a", "set_period_unit_all_time", "All Time"),
         ("m", "set_period_unit('months')", "Months"),
         ("y", "set_period_unit('years')", "Years"),
         Binding("D", "set_period_subdivision('daily')", "Daily"),
+        Binding("W", "set_period_subdivision('weekly')", "Weekly"),
         Binding("M", "set_period_subdivision('monthly')", "Monthly"),
         Binding("Y", "set_period_subdivision('yearly')", "Yearly"),
         Binding(key="d", action="cycle_depth", description="Depth"),
@@ -71,7 +73,7 @@ class HLedgerAssetsTab(Widget):
         hledger_assets = self.query_one(HLedgerAssets)
         hledger_assets.update_data(
             balances=self._account_balances,
-            table_title=self.hledger.period.value,
+            table_title=self.hledger.period.value or "All Time",
             table_subtitle=f"Depth: {self.hledger.depth}",
         )
         # Update plot for the currently selected account (if any)
@@ -108,6 +110,11 @@ class HLedgerAssetsTab(Widget):
     def action_set_period_unit(self, period_unit: str):
         """Set the unit for the HLedgerPeriod and refresh."""
         self.hledger.period.unit = period_unit  # pyright: ignore
+        self.update_data()
+
+    def action_set_period_unit_all_time(self):
+        """Set the period to all time and refresh."""
+        self.hledger.period.unit = None
         self.update_data()
 
     def action_set_period_subdivision(self, period_subdivision: str):
