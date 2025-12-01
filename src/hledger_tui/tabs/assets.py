@@ -15,10 +15,9 @@ from hledger_tui.widgets.hledger_assets import HLedgerAssets
 
 class HLedgerAssetsTab(Widget):
     BINDINGS = [
-        ("w", "set_period_unit('weeks')", "Weeks"),
         ("m", "set_period_unit('months')", "Months"),
         ("y", "set_period_unit('years')", "Years"),
-        Binding("W", "set_period_subdivision('weekly')", "Weekly"),
+        Binding("D", "set_period_subdivision('daily')", "Daily"),
         Binding("M", "set_period_subdivision('monthly')", "Monthly"),
         Binding("Y", "set_period_subdivision('yearly')", "Yearly"),
         Binding(key="d", action="cycle_depth", description="Depth"),
