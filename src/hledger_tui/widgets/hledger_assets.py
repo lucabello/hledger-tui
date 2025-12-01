@@ -104,7 +104,7 @@ class HLedgerAssets(Widget):
                 values=[b.balance_float for b in balance_over_time],
             )
             plot.update_label(
-                f"{selected_account} ({self._hledger.period.value or 'All Time'}, {self._hledger.period.subdivision})"
+                f"{selected_account} ({self._hledger.period.value or 'all time'}, {self._hledger.period.subdivision})"
             )
 
     def on_accounts_data_table_account_selected(

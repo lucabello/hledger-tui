@@ -73,7 +73,7 @@ class HLedgerAssetsTab(Widget):
         hledger_assets = self.query_one(HLedgerAssets)
         hledger_assets.update_data(
             balances=self._account_balances,
-            table_title=self.hledger.period.value or "All Time",
+            table_title=self.hledger.period.value or "all time",
             table_subtitle=f"Depth: {self.hledger.depth}",
         )
         # Update plot for the currently selected account (if any)

@@ -68,7 +68,7 @@ class HLedgerBalanceTab(Widget):
         hledger_balance = self.query_one(HLedgerBalance)
         hledger_balance.update_data(
             balances=self._balances,
-            table_title=self.hledger.period.value or "All Time",
+            table_title=self.hledger.period.value or "all time",
             table_subtitle=f"Depth: {self.hledger.depth}",
         )
 
