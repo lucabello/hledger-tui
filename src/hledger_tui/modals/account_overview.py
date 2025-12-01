@@ -91,7 +91,7 @@ class ModalAccountOverview(ModalScreen):
             balances=balance_over_time,
             table_title=f"{self.hledger.period.subdivision} balance".title(),
             table_subtitle="",
-            plot_label=f"{self._selected_account} ({self.hledger.period.value or 'all time'})",
+            plot_label=f"{self._selected_account} ({self.hledger.period.pretty_value})",
         )
 
     def action_close_historical_modal(self):

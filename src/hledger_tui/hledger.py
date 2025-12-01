@@ -1,5 +1,6 @@
 import csv
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from io import StringIO
 from typing import ClassVar, Final, List, Literal, Optional
 
@@ -88,6 +89,71 @@ class HLedgerPeriod:
         if self._offset == 0:
             return f"this {pretty_unit}"
         return f"{abs(self._offset)} {pretty_unit} {direction}"
+
+    def _get_period_date(self) -> str:
+        """Calculate the actual date/period this HLedgerPeriod refers to."""
+        if self.unit is None:
+            return "All Time"
+
+        today = datetime.now()
+
+        if self.unit == "weeks":
+            # Calculate the start of the week (Monday)
+            days_since_monday = today.weekday()
+            start_of_this_week = today - timedelta(days=days_since_monday)
+            # Apply offset
+            target_week_start = start_of_this_week - timedelta(weeks=self._offset)
+            return target_week_start.strftime("%Y/%m/%d")
+
+        elif self.unit == "months":
+            # Calculate target month
+            target_month = today.month - self._offset
+            target_year = today.year
+
+            # Handle year overflow/underflow
+            while target_month > 12:
+                target_month -= 12
+                target_year += 1
+            while target_month < 1:
+                target_month += 12
+                target_year -= 1
+
+            return f"{target_year:04d}/{target_month:02d}"
+
+        elif self.unit == "quarters":
+            # Calculate target quarter
+            current_quarter = (today.month - 1) // 3 + 1
+            target_quarter = current_quarter - self._offset
+            target_year = today.year
+
+            # Handle year overflow/underflow
+            while target_quarter > 4:
+                target_quarter -= 4
+                target_year += 1
+            while target_quarter < 1:
+                target_quarter += 4
+                target_year -= 1
+
+            return f"{target_year:04d}/Q{target_quarter}"
+
+        elif self.unit == "years":
+            target_year = today.year - self._offset
+            return f"{target_year:04d}"
+
+        return ""
+
+    @property
+    def pretty_value(self) -> str:
+        """Human-readable period string with actual date/period information."""
+        if self.unit is None:
+            return "All Time"
+
+        base_value = self.value or ""
+        date_info = self._get_period_date()
+
+        if date_info:
+            return f"{base_value} ({date_info})"
+        return base_value
 
     def previous_period(self):
         """Decrease the period offset by one."""
