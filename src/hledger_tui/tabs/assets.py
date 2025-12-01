@@ -54,6 +54,8 @@ class HLedgerAssetsTab(Widget):
         )
 
         self.hledger = HLedger(queries=HLedger.DEFAULT_HLEDGER_ASSETS_QUERIES)
+        self.hledger.period.unit = "years"
+        self.hledger.period.subdivision = "weekly"
         self._balances: List[AccountHistoricalBalance] = []
         self._selected_tag: Optional[str] = None
 
