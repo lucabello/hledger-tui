@@ -13,13 +13,21 @@ hledger.period.subdivision = "weekly"  # weekly, monthly, quarterly, yearly, or 
 print(f"Period: {hledger.period.value}")
 print(f"Subdivision: {hledger.period.subdivision}")
 
-# Get balance over time for a specific account
+# Get balance changes over time for a specific account (non-cumulative)
 account = "assets:cash"
-print(f"\nBalance over time for '{account}':")
+print(f"\nBalance changes over time for '{account}' (historical=False):")
 
-balance_over_time = hledger.balance_over_time(account=account)
+balance_over_time = hledger.balance_over_time(account=account, historical=False)
 
 for balance in balance_over_time:
+    print(f"  {balance.name}: {balance.balance} ({balance.balance_float})")
+
+# Get historical balance over time (cumulative)
+print(f"\nHistorical balance over time for '{account}' (historical=True):")
+
+historical_balance = hledger.balance_over_time(account=account, historical=True)
+
+for balance in historical_balance:
     print(f"  {balance.name}: {balance.balance} ({balance.balance_float})")
 
 # You can also change the subdivision and get different granularity

@@ -91,9 +91,9 @@ class HLedgerAssets(Widget):
         if not selected_account:
             return
 
-        # Fetch balance over time for the selected account
+        # Fetch historical balance over time for the selected account
         balance_over_time: List[CategoricalBalance] = self._hledger.balance_over_time(
-            account=selected_account
+            account=selected_account, historical=True
         )
 
         # Update the plot

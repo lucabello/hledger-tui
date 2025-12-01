@@ -222,10 +222,24 @@ class HLedger:
             balances.append(CategoricalBalance(*row))
         return sorted(balances, key=lambda b: b.name)
 
-    def balance_over_time(self, account: str, **kwargs) -> List[CategoricalBalance]:
-        """Return the result from 'heldger balance', but spread over a time subdivision.
+    def balance_over_time(
+        self, account: str, historical: bool = False, **kwargs
+    ) -> List[CategoricalBalance]:
+        """Return the result from 'hledger balance', but spread over a time subdivision.
 
-        For example, if the reference period is 'year', return the monthly balance.
+        Args:
+            account: The account to query
+            historical: If True, shows cumulative historical balance at each point in time.
+                       If False, shows balance changes within the period (non-cumulative).
+            **kwargs: Additional arguments to pass to hledger balance
+
+        Returns:
+            List of CategoricalBalance with time period and balance data
+
+        Example:
+            For a yearly period with monthly subdivision:
+            - historical=False: monthly balance changes
+            - historical=True: cumulative balance at end of each month
         """
         balance_over_time: List[CategoricalBalance] = []
         raw_balances = sh.hledger.balance(  # pyright: ignore
@@ -234,7 +248,7 @@ class HLedger:
             period=self.period.value,
             no_total=True,
             market=True,  # Unify to one currency for simplicity
-            historical=True,
+            historical=historical,
             output_format="csv",
             daily=self.period.subdivision == "daily",
             weekly=self.period.subdivision == "weekly",
