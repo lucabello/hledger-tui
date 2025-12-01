@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import List, Optional
 
 from rich.color import Color
@@ -152,7 +153,10 @@ class BarPlot(PlotextPlot):
         ticks = []
         # Add negative ticks if there are negative values
         if min_value < 0:
-            ticks.extend([i for i in range(int(min_value), 0, self.ticks_scale)])
+            # Calculate how many negative ticks we need (ceiling of abs(min_value) / ticks_scale)
+            num_negative_ticks = math.ceil(abs(min_value) / self.ticks_scale)
+            # Generate negative ticks from -num_negative_ticks * ticks_scale to 0
+            ticks.extend([-i * self.ticks_scale for i in range(num_negative_ticks, 0, -1)])
         # Add positive ticks
         ticks.extend([i for i in range(0, int(max_value), self.ticks_scale)])
         self.plt.xticks(ticks=ticks, xside=2)
