@@ -4,13 +4,19 @@ set shell := ["bash", "-c"]
 default:
   just --list
 
+# Run all quality checks
+[group("dev")]
+check: format lint test
+
 # Lint the codebase using ruff
 [group("dev")]
-lint:
+lint: && format
     # Lint the code
     ruff check
     # Run static checks
     pyright src
+    # Check for dead code
+    vulture src --min-confidence=80 --ignore-names="parameters"
 
 # Format the codebase using ruff
 [group("dev")]
@@ -21,6 +27,11 @@ format:
     ruff check --select=I --fix-only
     # Format the code
     ruff format
+
+# Run tests
+[group("dev")]
+test:
+    pytest
 
 # Build the project
 [group("build")]
@@ -55,7 +66,7 @@ clean:
 #     fi
 #     gh release create "v${pyproject_release}" --generate-notes --notes-start-tag="${latest_release}"
 
-# Run the app with hledger-tui
+# Run the app with Textual
 [group("dev")]
 run:
 	uv run textual run src/hledger_tui/app.py --dev

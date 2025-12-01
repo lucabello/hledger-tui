@@ -1,14 +1,15 @@
 from typing import List, Optional
 
+from textual import work
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Footer
 
-from hledger_tui.hledger import CategoricalBalance, HLedger
-from hledger_tui.widgets.grid_footer import GridFooter
-from hledger_tui.widgets.hledger_balance import HLedgerBalance
+from hledger_tui.core.models import CategoricalBalance
+from hledger_tui.core.service import HLedger
+from hledger_tui.ui.widgets.hledger_balance import HLedgerBalance
 
 
 class ModalTagOverview(ModalScreen):
@@ -16,6 +17,7 @@ class ModalTagOverview(ModalScreen):
         Binding("d", "cycle_depth", "Depth"),
         Binding("shift+down", "change_account(1)", "Next Account"),
         Binding("shift+up", "change_account(-1)", "Previous Account"),
+        Binding(key="t", action="show_transactions", description="Transactions", priority=True),
         Binding(key="q", action="close_modal", description="Close"),
         Binding(key="escape", action="close_modal", description="Close"),
     ]
@@ -23,7 +25,7 @@ class ModalTagOverview(ModalScreen):
     ModalTagOverview {
         align: center middle;
         Vertical {
-            width: 80%;
+            width: 60%;
             height: 80%;
         }
         Horizontal {
@@ -91,3 +93,33 @@ class ModalTagOverview(ModalScreen):
         """Cycle through account depths and refresh the widgets accordingly."""
         self.hledger.cycle_depth()
         self.update_data()
+
+    @work
+    async def action_show_transactions(self) -> None:
+        """Show transactions for the selected account with the tag filter."""
+        from hledger_tui.ui.modals.transaction_list import ModalTransactionList
+        from hledger_tui.ui.widgets.account_datatable import AccountsDataTable
+
+        table = self.query_one(AccountsDataTable)
+        selected_account = table.selected_account
+
+        if not selected_account:
+            return
+
+        # Build the tag filter string
+        # self._tag already contains "tag:key", so we just need to add "=value"
+        # Strip the leading "=" or ":" from tag_value if present
+        tag_value = self._tag_value
+        if tag_value.startswith("=") or tag_value.startswith(":"):
+            tag_value = tag_value[1:]
+        tag_filter = f"{self._tag}={tag_value}"
+
+        await self.app.push_screen(
+            ModalTransactionList(
+                hledger=self.hledger,
+                account=selected_account,
+                tag=tag_filter,
+                period="",  # Tag view targets the whole journal, not a specific period
+                title=f"Transactions: {selected_account} ({tag_filter})",
+            )
+        )
