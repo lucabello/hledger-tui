@@ -218,8 +218,10 @@ class PlotPlot(PlotextPlot):
         self.plt.clear_data()
         if not self.values or not self.categories:
             return
+        # Use numeric indices instead of date strings to avoid date parsing issues
+        x_values = list(range(len(self.categories)))
         self.plt.plot(
-            self.categories,
+            x_values,
             self.values,
             color=self.color.triplet,
         )
