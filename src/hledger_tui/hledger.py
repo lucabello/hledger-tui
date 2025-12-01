@@ -101,13 +101,13 @@ class HLedgerPeriod:
             # Calculate the start of the week (Monday)
             days_since_monday = today.weekday()
             start_of_this_week = today - timedelta(days=days_since_monday)
-            # Apply offset
-            target_week_start = start_of_this_week - timedelta(weeks=self._offset)
+            # Apply offset (negative offset means past, positive means future)
+            target_week_start = start_of_this_week + timedelta(weeks=self._offset)
             return target_week_start.strftime("%Y/%m/%d")
 
         elif self.unit == "months":
             # Calculate target month
-            target_month = today.month - self._offset
+            target_month = today.month + self._offset
             target_year = today.year
 
             # Handle year overflow/underflow
@@ -123,7 +123,7 @@ class HLedgerPeriod:
         elif self.unit == "quarters":
             # Calculate target quarter
             current_quarter = (today.month - 1) // 3 + 1
-            target_quarter = current_quarter - self._offset
+            target_quarter = current_quarter + self._offset
             target_year = today.year
 
             # Handle year overflow/underflow
@@ -137,7 +137,7 @@ class HLedgerPeriod:
             return f"{target_year:04d}/Q{target_quarter}"
 
         elif self.unit == "years":
-            target_year = today.year - self._offset
+            target_year = today.year + self._offset
             return f"{target_year:04d}"
 
         return ""
