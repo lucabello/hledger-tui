@@ -146,9 +146,16 @@ class BarPlot(PlotextPlot):
         self.plt.frame(False)
         if not self.values:
             return
-        self.plt.xticks(
-            ticks=[i for i in range(0, int(max(self.values)), self.ticks_scale)], xside=2
-        )
+        # Generate ticks for both positive and negative values
+        min_value = min(self.values)
+        max_value = max(self.values)
+        ticks = []
+        # Add negative ticks if there are negative values
+        if min_value < 0:
+            ticks.extend([i for i in range(int(min_value), 0, self.ticks_scale)])
+        # Add positive ticks
+        ticks.extend([i for i in range(0, int(max_value), self.ticks_scale)])
+        self.plt.xticks(ticks=ticks, xside=2)
         # NOTE: The plot doesn't always update correctly when this function is called;
         # for some reason, calling self.on_mount() makes the bar plot update correctly.
         self.on_mount()
