@@ -234,6 +234,7 @@ class HLedger:
             period=self.period.value,
             no_total=True,
             market=True,  # Unify to one currency for simplicity
+            historical=True,
             output_format="csv",
             daily=self.period.subdivision == "daily",
             weekly=self.period.subdivision == "weekly",
