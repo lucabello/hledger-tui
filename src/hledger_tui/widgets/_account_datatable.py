@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from textual.coordinate import Coordinate
+from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import DataTable
 from typing_extensions import override
@@ -9,6 +10,13 @@ from hledger_tui.hledger import CategoricalBalance
 
 
 class AccountsDataTable(DataTable):
+    class AccountSelected(Message):
+        """Message emitted when an account is selected in the table."""
+
+        def __init__(self, account: str) -> None:
+            super().__init__()
+            self.account = account
+
     def __init__(
         self,
         category_name: str = "Account",
@@ -78,3 +86,9 @@ class AccountsDataTable(DataTable):
             return
 
         self._linked_scrollable.scroll_to(x=0, y=float(self.scroll_offset.y))
+
+        # Emit message when account selection changes
+        if old_coordinate.row != new_coordinate.row:
+            selected = self.selected_account
+            if selected:
+                self.post_message(self.AccountSelected(selected))

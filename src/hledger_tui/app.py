@@ -1,16 +1,12 @@
 from textual.app import App, ComposeResult
-from textual.binding import Binding
 from textual.widgets import (
     Footer,
-    Header,
-    Label,
-    Switch,
     TabbedContent,
     TabPane,
 )
 
-from hledger_tui.tabs.balance import HLedgerBalanceTab
 from hledger_tui.tabs.assets import HLedgerAssetsTab
+from hledger_tui.tabs.balance import HLedgerBalanceTab
 
 
 class HLedgerViewApp(App):

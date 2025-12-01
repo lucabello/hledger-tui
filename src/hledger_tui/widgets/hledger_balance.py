@@ -1,10 +1,8 @@
 from typing import List
 
 from textual.app import ComposeResult
-from textual.binding import Binding
 from textual.containers import Horizontal, VerticalScroll
 from textual.widget import Widget
-from textual.widgets import RadioSet
 from typing_extensions import override
 
 from hledger_tui.hledger import CategoricalBalance, HLedger

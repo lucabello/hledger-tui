@@ -4,7 +4,6 @@ from collections import defaultdict
 from itertools import groupby
 
 import rich.repr
-
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.widgets import Footer
@@ -83,4 +82,3 @@ class GridFooter(Footer):
                     disabled=not enabled,
                     tooltip=binding.tooltip or binding.description,
                 )
-

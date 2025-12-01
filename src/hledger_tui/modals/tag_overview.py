@@ -7,7 +7,6 @@ from textual.screen import ModalScreen
 from textual.widgets import Footer
 
 from hledger_tui.hledger import CategoricalBalance, HLedger
-from hledger_tui.widgets.grid_footer import GridFooter
 from hledger_tui.widgets.hledger_balance import HLedgerBalance
 
 

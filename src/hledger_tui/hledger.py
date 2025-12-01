@@ -1,7 +1,7 @@
 import csv
 from dataclasses import dataclass
 from io import StringIO
-from typing import ClassVar, Dict, Final, List, Literal, Optional, TypeAlias, TypeVar
+from typing import ClassVar, Final, List, Literal, Optional, TypeAlias
 
 import sh
 

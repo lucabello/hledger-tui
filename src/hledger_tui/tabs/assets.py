@@ -1,16 +1,14 @@
-from typing import Final, List, Optional
+from typing import List, Optional
 
 from textual import work
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.widget import Widget
-from textual.widgets import RadioButton, RadioSet
 from typing_extensions import override
 
 from hledger_tui.hledger import AccountHistoricalBalance, CategoricalBalance, HLedger
 from hledger_tui.modals.account_overview import ModalAccountOverview
 from hledger_tui.modals.tag_overview import ModalTagOverview
-from hledger_tui.modals.tag_pivot import ModalTagPivot
 from hledger_tui.widgets._account_datatable import AccountsDataTable
 from hledger_tui.widgets.hledger_assets import HLedgerAssets
 
@@ -20,6 +18,9 @@ class HLedgerAssetsTab(Widget):
         ("w", "set_period_unit('weeks')", "Weeks"),
         ("m", "set_period_unit('months')", "Months"),
         ("y", "set_period_unit('years')", "Years"),
+        Binding("W", "set_period_subdivision('weekly')", "Weekly"),
+        Binding("M", "set_period_subdivision('monthly')", "Monthly"),
+        Binding("Y", "set_period_subdivision('yearly')", "Yearly"),
         Binding(key="d", action="cycle_depth", description="Depth"),
         Binding(key="o", action="overview_modal", description="Overview"),
         Binding(key="left", action="previous_period", description="Previous Period", show=False),
@@ -57,7 +58,7 @@ class HLedgerAssetsTab(Widget):
 
     @override
     def compose(self) -> ComposeResult:
-        yield HLedgerAssets()
+        yield HLedgerAssets(hledger=self.hledger)
 
     def on_mount(self):
         self.update_data()
@@ -74,6 +75,8 @@ class HLedgerAssetsTab(Widget):
             table_title=self.hledger.period.value,
             table_subtitle=f"Depth: {self.hledger.depth}",
         )
+        # Update plot for the currently selected account (if any)
+        hledger_assets.update_plot()
 
     @override
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
@@ -107,6 +110,16 @@ class HLedgerAssetsTab(Widget):
         """Set the unit for the HLedgerPeriod and refresh."""
         self.hledger.period.unit = period_unit  # pyright: ignore
         self.update_data()
+
+    def action_set_period_subdivision(self, period_subdivision: str):
+        """Set the subdivision for the HLedgerPeriod and refresh."""
+        self.hledger.period.subdivision = period_subdivision
+        self.update_plot()
+
+    def update_plot(self) -> None:
+        """Update only the plot with the selected account's balance over time."""
+        hledger_assets = self.query_one(HLedgerAssets)
+        hledger_assets.update_plot()
 
     @work
     async def action_overview_modal(self):

@@ -1,13 +1,13 @@
 from __future__ import annotations
+
 from typing import List, Optional
 
 from rich.color import Color
 from textual.app import ComposeResult
+from textual.containers import VerticalScroll
 from textual.widget import Widget
 from textual.widgets import Label, Static
 from textual_plotext import PlotextPlot
-
-from textual.containers import VerticalScroll
 from typing_extensions import override
 
 
@@ -214,22 +214,28 @@ class PlotPlot(PlotextPlot):
         self.recreate()
 
     def recreate(self):
-        """Refresh the bar plot with data saved in the BarPlot instance."""
+        """Refresh the plot with data saved in the PlotPlot instance."""
         self.plt.clear_data()
+        if not self.values or not self.categories:
+            return
         self.plt.plot(
             self.categories,
             self.values,
-            xside="upper",
             color=self.color.triplet,
         )
-        self.styles.height = len(self.categories) + 1
-        self.plt.grid(vertical=True)
+        # Dynamically adjust height based on data points for better visibility
+        self.styles.height = max(10, min(30, len(self.categories) // 2 + 5))
+        self.plt.grid(True, True)
         self.plt.frame(False)
-        if not self.values:
-            return
-        self.plt.xticks(
-            ticks=[i for i in range(0, int(max(self.values)), self.ticks_scale)], xside=2
-        )
+        # Set x-axis ticks to show dates at regular intervals
+        if len(self.categories) > 10:
+            # Show only a subset of dates to avoid clutter
+            step = len(self.categories) // 8
+            tick_indices = [float(i) for i in range(0, len(self.categories), step)]
+            tick_labels = [self.categories[int(i)] for i in tick_indices]
+            self.plt.xticks(tick_indices, tick_labels)
+        else:
+            self.plt.xticks([float(i) for i in range(len(self.categories))], self.categories)
         # NOTE: The plot doesn't always update correctly when this function is called;
-        # for some reason, calling self.on_mount() makes the bar plot update correctly.
+        # for some reason, calling self.on_mount() makes the plot update correctly.
         self.on_mount()

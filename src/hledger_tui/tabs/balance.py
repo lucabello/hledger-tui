@@ -1,10 +1,9 @@
-from typing import Final, List, Optional
+from typing import List, Optional
 
 from textual import work
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.widget import Widget
-from textual.widgets import RadioButton, RadioSet
 from typing_extensions import override
 
 from hledger_tui.hledger import CategoricalBalance, HLedger
