@@ -60,6 +60,7 @@ class HLedgerBalance(Widget):
             yield BarPlotScroll()
 
     def on_mount(self):
+        self.loading = True
         table = self.query_one(AccountsDataTable)
         table._linked_scrollable = self.query_one(VerticalScroll)
         self.query_one(AccountsDataTable).focus()
@@ -72,6 +73,7 @@ class HLedgerBalance(Widget):
         plot_label: str = "",
     ) -> None:
         """Fetch data, refresh the widgets, and return it."""
+        self.loading = False
         table = self.query_one(AccountsDataTable)
         table.update_data(balances=balances)
         table.border_title = table_title
