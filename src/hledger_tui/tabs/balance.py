@@ -62,8 +62,9 @@ class HLedgerBalanceTab(Widget):
     def on_mount(self):
         self.update_data()
 
-    def update_data(self) -> None:
-        self._balances = self.hledger.balance()
+    @work(exclusive=True)
+    async def update_data(self) -> None:
+        self._balances = await self.run_in_thread(self.hledger.balance)
         self._balances_accounts = [b.name for b in self._balances]
         hledger_balance = self.query_one(HLedgerBalance)
         hledger_balance.update_data(
@@ -72,8 +73,9 @@ class HLedgerBalanceTab(Widget):
             table_subtitle=f"Depth: {self.hledger.depth}",
         )
 
-    def update_tag_data(self, tag: str) -> None:
-        self._balances = self.hledger.tag_balance(tag=tag, pivot=tag)
+    @work(exclusive=True)
+    async def update_tag_data(self, tag: str) -> None:
+        self._balances = await self.run_in_thread(self.hledger.tag_balance, tag=tag, pivot=tag)
         self._balances_accounts = [b.name for b in self._balances]
         hledger_balance = self.query_one(HLedgerBalance)
         hledger_balance.update_data(

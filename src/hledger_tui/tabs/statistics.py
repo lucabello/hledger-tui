@@ -47,16 +47,17 @@ class HLedgerStatisticsTab(Widget):
     def on_mount(self) -> None:
         self.update_statistics()
 
-    def update_statistics(self) -> None:
+    @work(exclusive=True)
+    async def update_statistics(self) -> None:
         """Load and display journal statistics."""
         stats_widget = self.query_one("#stats-content", Static)
         try:
-            stats_widget.update("Fetching data from hledger...")
+            stats_widget.update("[dim]Fetching data from hledger...[/dim]")
             
-            stats_output = HLedger.stats()
-            files = HLedger.files()
-            all_accounts = HLedger.all_accounts()
-            commodities = HLedger.commodities()
+            stats_output = await self.run_in_thread(HLedger.stats)
+            files = await self.run_in_thread(HLedger.files)
+            all_accounts = await self.run_in_thread(HLedger.all_accounts)
+            commodities = await self.run_in_thread(HLedger.commodities)
 
             # Parse the stats output
             stats_dict = self._parse_stats(stats_output)
