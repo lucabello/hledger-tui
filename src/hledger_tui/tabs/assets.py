@@ -142,6 +142,7 @@ class HLedgerAssetsTab(Widget):
                     selected_account=table.selected_account,
                     accounts=[b.name for b in self._balances or []],
                     hledger=self.hledger,
+                    use_pretty_period=False,
                 )
             )
             if self.hledger.period.value != period_before_modal:

@@ -60,6 +60,7 @@ class ModalAccountOverview(ModalScreen):
         hledger: HLedger,
         selected_account: str,
         accounts: List[str],
+        use_pretty_period: bool = True,
         name: Optional[str] = None,
         id: Optional[str] = None,
         classes: Optional[str] = None,
@@ -72,6 +73,7 @@ class ModalAccountOverview(ModalScreen):
         self.hledger = hledger
         self._selected_account = selected_account
         self._accounts = accounts
+        self._use_pretty_period = use_pretty_period
 
     def compose(self) -> ComposeResult:
         """Show historical balance for an account."""
@@ -86,12 +88,17 @@ class ModalAccountOverview(ModalScreen):
         balance_over_time: List[CategoricalBalance] = self.hledger.balance_over_time(
             account=self._selected_account
         )
+        period_display = (
+            self.hledger.period.pretty_value
+            if self._use_pretty_period
+            else self.hledger.period.value
+        )
         hledger_balance = self.query_one(HLedgerBalance)
         hledger_balance.update_data(
             balances=balance_over_time,
             table_title=f"{self.hledger.period.subdivision} balance".title(),
             table_subtitle="",
-            plot_label=f"{self._selected_account} ({self.hledger.period.pretty_value})",
+            plot_label=f"{self._selected_account} ({period_display})",
         )
 
     def action_close_historical_modal(self):
