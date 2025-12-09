@@ -385,6 +385,29 @@ class HLedger:
         tags = [t for t in raw_tags if t]
         return tags
 
+    @staticmethod
+    def stats() -> str:
+        """Return the output from 'hledger stats'."""
+        return sh.hledger.stats(_tty_out=False).strip()  # pyright: ignore
+
+    @staticmethod
+    def files() -> List[str]:
+        """Return the list of journal files."""
+        raw_files: str = sh.hledger.files(_tty_out=False).strip()  # pyright: ignore
+        return [f for f in raw_files.split("\n") if f]
+
+    @staticmethod
+    def all_accounts() -> List[str]:
+        """Return all accounts in the journal."""
+        raw_accounts: str = sh.hledger.accounts(_tty_out=False).strip()  # pyright: ignore
+        return [a for a in raw_accounts.split("\n") if a]
+
+    @staticmethod
+    def commodities() -> List[str]:
+        """Return the list of commodities/currencies used."""
+        raw_commodities: str = sh.hledger.commodities(_tty_out=False).strip()  # pyright: ignore
+        return [c for c in raw_commodities.split("\n") if c]
+
     # @staticmethod
     # def print() -> str:
     #     return sh.hledger.print(explicit=True, round="soft")  # pyright: ignore

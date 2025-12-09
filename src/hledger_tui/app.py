@@ -7,6 +7,7 @@ from textual.widgets import (
 
 from hledger_tui.tabs.assets import HLedgerAssetsTab
 from hledger_tui.tabs.balance import HLedgerBalanceTab
+from hledger_tui.tabs.statistics import HLedgerStatisticsTab
 
 
 class HLedgerViewApp(App):
@@ -29,6 +30,8 @@ class HLedgerViewApp(App):
                 yield HLedgerAssetsTab()
                 # yield Label()
                 # yield HLedgerBalanceTab()
+            with TabPane("Statistics", id="statistics"):
+                yield HLedgerStatisticsTab()
         yield Footer()
 
     def action_switch_tab(self, tab_id: str):
