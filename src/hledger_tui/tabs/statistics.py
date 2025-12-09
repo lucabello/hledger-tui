@@ -38,13 +38,21 @@ class HLedgerStatisticsTab(Widget):
             classes=classes,
         )
         self.hledger = HLedger()
+        self._loaded: bool = False
 
     @override
     def compose(self) -> ComposeResult:
         yield Static("Loading statistics...", id="stats-content")
 
     def on_mount(self) -> None:
-        self.update_statistics()
+        # Don't load data on mount - wait for tab to become visible
+        pass
+
+    def on_show(self) -> None:
+        """Called when the tab becomes visible."""
+        if not self._loaded:
+            self._loaded = True
+            self.update_statistics()
 
     @work(exclusive=True)
     async def update_statistics(self) -> None:

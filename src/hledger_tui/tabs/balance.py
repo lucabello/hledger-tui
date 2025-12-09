@@ -54,13 +54,21 @@ class HLedgerBalanceTab(Widget):
         self.hledger = HLedger(queries=HLedger.DEFAULT_HLEDGER_QUERIES)
         self._balances: List[CategoricalBalance] = []
         self._selected_tag: Optional[str] = None
+        self._loaded: bool = False
 
     @override
     def compose(self) -> ComposeResult:
         yield HLedgerBalance()
 
     def on_mount(self):
-        self.update_data()
+        # Don't load data on mount - wait for tab to become visible
+        pass
+
+    def on_show(self) -> None:
+        """Called when the tab becomes visible."""
+        if not self._loaded:
+            self._loaded = True
+            self.update_data()
 
     @work(exclusive=True)
     async def update_data(self) -> None:
