@@ -73,10 +73,9 @@ class HLedgerStatisticsTab(Widget):
             yield Static("Loading statistics...", id="stats-content")
 
     def on_mount(self) -> None:
-        self.load_statistics()
+        self.update_statistics()
 
-    @work(exclusive=True, thread=True)
-    def load_statistics(self) -> None:
+    def update_statistics(self) -> None:
         """Load and display journal statistics."""
         try:
             stats_output = HLedger.stats()
@@ -90,16 +89,14 @@ class HLedgerStatisticsTab(Widget):
             # Build the statistics display
             content = self._build_statistics_display(stats_dict, files, all_accounts, commodities)
 
-            # Update the UI on the main thread
-            self.app.call_from_thread(self._update_display, content)
+            # Update the UI
+            stats_widget = self.query_one("#stats-content", Static)
+            stats_widget.update(content)
         except Exception as e:
-            error_msg = f"[bold red]Error loading statistics:[/bold red]\n\n{str(e)}"
-            self.app.call_from_thread(self._update_display, error_msg)
-
-    def _update_display(self, content: str) -> None:
-        """Update the display with the statistics content."""
-        stats_widget = self.query_one("#stats-content", Static)
-        stats_widget.update(content)
+            import traceback
+            error_msg = f"[bold red]Error loading statistics:[/bold red]\n\n{str(e)}\n\n{traceback.format_exc()}"
+            stats_widget = self.query_one("#stats-content", Static)
+            stats_widget.update(error_msg)
 
     def _parse_stats(self, stats_output: str) -> dict:
         """Parse the hledger stats output into a dictionary."""
