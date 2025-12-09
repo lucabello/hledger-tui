@@ -3,7 +3,6 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from textual import work
 from textual.app import ComposeResult
 from textual.containers import VerticalScroll
 from textual.widget import Widget
@@ -20,34 +19,8 @@ class HLedgerStatisticsTab(Widget):
         padding: 1 2;
     }
     
-    HLedgerStatisticsTab VerticalScroll {
-        height: 100%;
-    }
-    
-    HLedgerStatisticsTab .stat-section {
-        margin: 1 0;
-        padding: 1 2;
-        border: solid $primary;
-        background: $surface;
-    }
-    
-    HLedgerStatisticsTab .stat-title {
-        text-style: bold;
-        color: $accent;
-        margin-bottom: 1;
-    }
-    
-    HLedgerStatisticsTab .stat-row {
-        margin: 0 0 0 2;
-    }
-    
-    HLedgerStatisticsTab .stat-label {
-        color: $text-muted;
-    }
-    
-    HLedgerStatisticsTab .stat-value {
-        color: $text;
-        text-style: bold;
+    HLedgerStatisticsTab Static {
+        height: auto;
     }
     """
 
@@ -69,15 +42,17 @@ class HLedgerStatisticsTab(Widget):
 
     @override
     def compose(self) -> ComposeResult:
-        with VerticalScroll():
-            yield Static("Loading statistics...", id="stats-content")
+        yield Static("Loading statistics...", id="stats-content")
 
     def on_mount(self) -> None:
         self.update_statistics()
 
     def update_statistics(self) -> None:
         """Load and display journal statistics."""
+        stats_widget = self.query_one("#stats-content", Static)
         try:
+            stats_widget.update("Fetching data from hledger...")
+            
             stats_output = HLedger.stats()
             files = HLedger.files()
             all_accounts = HLedger.all_accounts()
@@ -90,12 +65,10 @@ class HLedgerStatisticsTab(Widget):
             content = self._build_statistics_display(stats_dict, files, all_accounts, commodities)
 
             # Update the UI
-            stats_widget = self.query_one("#stats-content", Static)
             stats_widget.update(content)
         except Exception as e:
             import traceback
             error_msg = f"[bold red]Error loading statistics:[/bold red]\n\n{str(e)}\n\n{traceback.format_exc()}"
-            stats_widget = self.query_one("#stats-content", Static)
             stats_widget.update(error_msg)
 
     def _parse_stats(self, stats_output: str) -> dict:
