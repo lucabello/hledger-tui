@@ -1,10 +1,9 @@
 import os
 import re
 from datetime import datetime
-from pathlib import Path
 
+from textual import work
 from textual.app import ComposeResult
-from textual.containers import VerticalScroll
 from textual.widget import Widget
 from textual.widgets import Static
 from typing_extensions import override
@@ -53,11 +52,11 @@ class HLedgerStatisticsTab(Widget):
         stats_widget = self.query_one("#stats-content", Static)
         try:
             stats_widget.update("[dim]Fetching data from hledger...[/dim]")
-            
-            stats_output = await self.run_in_thread(HLedger.stats)
-            files = await self.run_in_thread(HLedger.files)
-            all_accounts = await self.run_in_thread(HLedger.all_accounts)
-            commodities = await self.run_in_thread(HLedger.commodities)
+
+            stats_output = HLedger.stats()
+            files = HLedger.files()
+            all_accounts = HLedger.all_accounts()
+            commodities = HLedger.commodities()
 
             # Parse the stats output
             stats_dict = self._parse_stats(stats_output)
@@ -69,6 +68,7 @@ class HLedgerStatisticsTab(Widget):
             stats_widget.update(content)
         except Exception as e:
             import traceback
+
             error_msg = f"[bold red]Error loading statistics:[/bold red]\n\n{str(e)}\n\n{traceback.format_exc()}"
             stats_widget.update(error_msg)
 
@@ -109,8 +109,10 @@ class HLedgerStatisticsTab(Widget):
                     time_ago = f"{minutes} minute{'s' if minutes != 1 else ''} ago"
                 else:
                     time_ago = "just now"
-                lines.append(f"  [dim]Last modified:[/dim] {mod_datetime.strftime('%Y-%m-%d %H:%M:%S')} ({time_ago})")
-                
+                lines.append(
+                    f"  [dim]Last modified:[/dim] {mod_datetime.strftime('%Y-%m-%d %H:%M:%S')} ({time_ago})"
+                )
+
                 # File size
                 file_size = os.path.getsize(main_file_path)
                 if file_size > 1024 * 1024:
@@ -123,9 +125,9 @@ class HLedgerStatisticsTab(Widget):
 
         included_files = stats.get("Included files", "0")
         lines.append(f"  [dim]Included files:[/dim] {included_files}")
-        
+
         if len(files) > 1:
-            lines.append(f"  [dim]All files:[/dim]")
+            lines.append("  [dim]All files:[/dim]")
             for f in files:
                 lines.append(f"    • {f}")
 
@@ -136,8 +138,12 @@ class HLedgerStatisticsTab(Widget):
         lines.append(f"  [dim]Total transactions:[/dim] {stats.get('Txns', 'Unknown')}")
         lines.append(f"  [dim]Transaction span:[/dim] {stats.get('Txns span', 'Unknown')}")
         lines.append(f"  [dim]Last transaction:[/dim] {stats.get('Last txn', 'Unknown')}")
-        lines.append(f"  [dim]Transactions (last 30 days):[/dim] {stats.get('Txns last 30 days', 'Unknown')}")
-        lines.append(f"  [dim]Transactions (last 7 days):[/dim] {stats.get('Txns last 7 days', 'Unknown')}")
+        lines.append(
+            f"  [dim]Transactions (last 30 days):[/dim] {stats.get('Txns last 30 days', 'Unknown')}"
+        )
+        lines.append(
+            f"  [dim]Transactions (last 7 days):[/dim] {stats.get('Txns last 7 days', 'Unknown')}"
+        )
 
         # Parse unmarked transactions
         unmarked_count = self._count_unmarked_transactions()
@@ -150,12 +156,14 @@ class HLedgerStatisticsTab(Widget):
         lines.append("[bold cyan]🏦 Account Statistics[/bold cyan]\n")
         accounts_info = stats.get("Accounts", "Unknown")
         lines.append(f"  [dim]Total accounts:[/dim] {accounts_info}")
-        lines.append(f"  [dim]Payees/descriptions:[/dim] {stats.get('Payees/descriptions', 'Unknown')}")
-        
+        lines.append(
+            f"  [dim]Payees/descriptions:[/dim] {stats.get('Payees/descriptions', 'Unknown')}"
+        )
+
         # Account breakdown by type
         account_types = self._categorize_accounts(all_accounts)
         if account_types:
-            lines.append(f"  [dim]Account breakdown:[/dim]")
+            lines.append("  [dim]Account breakdown:[/dim]")
             for account_type, count in sorted(account_types.items()):
                 lines.append(f"    • {account_type}: {count}")
 
@@ -181,11 +189,12 @@ class HLedgerStatisticsTab(Widget):
         """Count transactions without a cleared/pending status mark."""
         try:
             import sh
+
             # Get all transactions with their status
             # Unmarked transactions don't have ! or * status
             output = sh.hledger.print(_tty_out=False)  # pyright: ignore
             lines = output.split("\n")
-            
+
             unmarked = 0
             for line in lines:
                 # Transaction lines start with a date (YYYY-MM-DD or YYYY/MM/DD)
@@ -201,7 +210,7 @@ class HLedgerStatisticsTab(Widget):
                     else:
                         # No description means unmarked
                         unmarked += 1
-            
+
             return unmarked
         except Exception:
             return None

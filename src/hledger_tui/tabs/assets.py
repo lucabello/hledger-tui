@@ -68,7 +68,7 @@ class HLedgerAssetsTab(Widget):
 
     @work(exclusive=True)
     async def update_data(self) -> None:
-        self._balances: List[AccountHistoricalBalance] = await self.run_in_thread(self.hledger.assets)
+        self._balances: List[AccountHistoricalBalance] = self.hledger.assets()
         self._account_balances: List[CategoricalBalance] = [
             CategoricalBalance(b.name, b.balances[-1].balance) for b in self._balances
         ]
