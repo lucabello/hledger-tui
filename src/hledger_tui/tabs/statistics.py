@@ -78,19 +78,23 @@ class HLedgerStatisticsTab(Widget):
     @work(exclusive=True, thread=True)
     def load_statistics(self) -> None:
         """Load and display journal statistics."""
-        stats_output = self.hledger.stats()
-        files = self.hledger.files()
-        all_accounts = self.hledger.all_accounts()
-        commodities = self.hledger.commodities()
+        try:
+            stats_output = HLedger.stats()
+            files = HLedger.files()
+            all_accounts = HLedger.all_accounts()
+            commodities = HLedger.commodities()
 
-        # Parse the stats output
-        stats_dict = self._parse_stats(stats_output)
+            # Parse the stats output
+            stats_dict = self._parse_stats(stats_output)
 
-        # Build the statistics display
-        content = self._build_statistics_display(stats_dict, files, all_accounts, commodities)
+            # Build the statistics display
+            content = self._build_statistics_display(stats_dict, files, all_accounts, commodities)
 
-        # Update the UI on the main thread
-        self.app.call_from_thread(self._update_display, content)
+            # Update the UI on the main thread
+            self.app.call_from_thread(self._update_display, content)
+        except Exception as e:
+            error_msg = f"[bold red]Error loading statistics:[/bold red]\n\n{str(e)}"
+            self.app.call_from_thread(self._update_display, error_msg)
 
     def _update_display(self, content: str) -> None:
         """Update the display with the statistics content."""
