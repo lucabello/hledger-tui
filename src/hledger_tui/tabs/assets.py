@@ -67,7 +67,7 @@ class HLedgerAssetsTab(Widget):
         # Load data asynchronously after the UI is rendered
         self.call_after_refresh(self.update_data)
 
-    @work(exclusive=True)
+    @work(exclusive=True, thread=True)
     async def update_data(self) -> None:
         self._balances: List[AccountHistoricalBalance] = self.hledger.assets()
         self._account_balances: List[CategoricalBalance] = [

@@ -63,7 +63,7 @@ class HLedgerBalanceTab(Widget):
         # Load data asynchronously after the UI is rendered
         self.call_after_refresh(self.update_data)
 
-    @work(exclusive=True)
+    @work(exclusive=True, thread=True)
     async def update_data(self) -> None:
         self._balances = self.hledger.balance()
         self._balances_accounts = [b.name for b in self._balances]
@@ -74,7 +74,7 @@ class HLedgerBalanceTab(Widget):
             table_subtitle=f"Depth: {self.hledger.depth}",
         )
 
-    @work(exclusive=True)
+    @work(exclusive=True, thread=True)
     async def update_tag_data(self, tag: str) -> None:
         self._balances = self.hledger.tag_balance(tag=tag, pivot=tag)
         self._balances_accounts = [b.name for b in self._balances]

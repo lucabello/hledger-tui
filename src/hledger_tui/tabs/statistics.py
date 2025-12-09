@@ -47,7 +47,7 @@ class HLedgerStatisticsTab(Widget):
         # Load data asynchronously after the UI is rendered
         self.call_after_refresh(self.update_statistics)
 
-    @work(exclusive=True)
+    @work(exclusive=True, thread=True)
     async def update_statistics(self) -> None:
         """Load and display journal statistics."""
         stats_widget = self.query_one("#stats-content", Static)
