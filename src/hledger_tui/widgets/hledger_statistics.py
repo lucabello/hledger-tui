@@ -5,7 +5,7 @@ from datetime import datetime
 from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import Static
-from texual.containers import VerticalScroll
+from textual.containers import VerticalScroll
 from typing_extensions import override
 
 
