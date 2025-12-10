@@ -5,6 +5,7 @@ from datetime import datetime
 from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import Static
+from texual.containers import VerticalScroll
 from typing_extensions import override
 
 
@@ -35,7 +36,8 @@ class HLedgerStatistics(Widget):
 
     @override
     def compose(self) -> ComposeResult:
-        yield Static("Loading statistics...", id="stats-content")
+        with VerticalScroll():
+            yield Static("Loading statistics...", id="stats-content")
 
     def on_mount(self) -> None:
         self.loading = True
@@ -76,7 +78,7 @@ class HLedgerStatistics(Widget):
         lines = []
 
         # Journal Files Section
-        lines.append("[bold cyan]📁 Journal Files[/bold cyan]\n")
+        lines.append("[bold]📁 Journal Files[/bold]\n")
         main_file = stats.get("Main file", "Unknown")
         lines.append(f"  [dim]Main file:[/dim] {main_file}")
 
@@ -122,7 +124,7 @@ class HLedgerStatistics(Widget):
         lines.append("")
 
         # Transaction Statistics Section
-        lines.append("[bold cyan]📊 Transaction Statistics[/bold cyan]\n")
+        lines.append("[bold]📊 Transaction Statistics[/bold]\n")
         lines.append(f"  [dim]Total transactions:[/dim] {stats.get('Txns', 'Unknown')}")
         lines.append(f"  [dim]Transaction span:[/dim] {stats.get('Txns span', 'Unknown')}")
         lines.append(f"  [dim]Last transaction:[/dim] {stats.get('Last txn', 'Unknown')}")
@@ -141,7 +143,7 @@ class HLedgerStatistics(Widget):
         lines.append("")
 
         # Account Statistics Section
-        lines.append("[bold cyan]🏦 Account Statistics[/bold cyan]\n")
+        lines.append("[bold]🏦 Account Statistics[/bold]\n")
         accounts_info = stats.get("Accounts", "Unknown")
         lines.append(f"  [dim]Total accounts:[/dim] {accounts_info}")
         lines.append(
@@ -157,17 +159,8 @@ class HLedgerStatistics(Widget):
 
         lines.append("")
 
-        # Currency/Commodity Statistics Section
-        lines.append("[bold cyan]💱 Currencies & Commodities[/bold cyan]\n")
-        lines.append(f"  [dim]Total commodities:[/dim] {stats.get('Commodities', 'Unknown')}")
-        if commodities:
-            lines.append(f"  [dim]Available commodities:[/dim] {', '.join(commodities)}")
-        lines.append(f"  [dim]Market prices:[/dim] {stats.get('Market prices', 'Unknown')}")
-
-        lines.append("")
-
         # Performance Statistics Section
-        lines.append("[bold cyan]⚡ Performance[/bold cyan]\n")
+        lines.append("[bold]⚡ Performance[/bold]\n")
         runtime = stats.get("Runtime stats", "Unknown")
         lines.append(f"  [dim]Runtime stats:[/dim] {runtime}")
 
