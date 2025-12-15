@@ -5,7 +5,7 @@ from datetime import datetime
 from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import Static
-from textual.containers import VerticalScroll
+from textual.containers import VerticalScroll, Horizontal
 from typing_extensions import override
 
 
@@ -16,8 +16,15 @@ class HLedgerStatistics(Widget):
         padding: 1 2;
     }
     
+    HLedgerStatistics Horizontal {
+        width: 100%;
+        height: auto;
+    }
+    
     HLedgerStatistics Static {
         height: auto;
+        width: 50%;
+        padding: 0 1;
     }
     """
 
@@ -37,7 +44,9 @@ class HLedgerStatistics(Widget):
     @override
     def compose(self) -> ComposeResult:
         with VerticalScroll():
-            yield Static("Loading statistics...", id="stats-content")
+            with Horizontal():
+                yield Static("Loading statistics...", id="stats-left-column")
+                yield Static("", id="stats-right-column")
 
     def on_mount(self) -> None:
         self.loading = True
@@ -51,16 +60,19 @@ class HLedgerStatistics(Widget):
     ) -> None:
         """Update the statistics display with the provided data."""
         self.loading = False
-        stats_widget = self.query_one("#stats-content", Static)
+        left_column = self.query_one("#stats-left-column", Static)
+        right_column = self.query_one("#stats-right-column", Static)
 
         # Parse the stats output
         stats_dict = self._parse_stats(stats_output)
 
-        # Build the statistics display
-        content = self._build_statistics_display(stats_dict, files, all_accounts, commodities)
+        # Build the statistics display for both columns
+        left_content = self._build_left_column(stats_dict, files)
+        right_content = self._build_right_column(stats_dict, all_accounts)
 
         # Update the UI
-        stats_widget.update(content)
+        left_column.update(left_content)
+        right_column.update(right_content)
 
     def _parse_stats(self, stats_output: str) -> dict:
         """Parse the hledger stats output into a dictionary."""
@@ -71,10 +83,8 @@ class HLedgerStatistics(Widget):
                 stats[key.strip()] = value.strip()
         return stats
 
-    def _build_statistics_display(
-        self, stats: dict, files: list[str], all_accounts: list[str], commodities: list[str]
-    ) -> str:
-        """Build a formatted display of statistics."""
+    def _build_left_column(self, stats: dict, files: list[str]) -> str:
+        """Build the left column with Journal Files and Performance sections."""
         lines = []
 
         # Journal Files Section
@@ -123,6 +133,17 @@ class HLedgerStatistics(Widget):
 
         lines.append("")
 
+        # Performance Statistics Section
+        lines.append("[bold]⚡ Performance[/bold]\n")
+        runtime = stats.get("Runtime stats", "Unknown")
+        lines.append(f"  [dim]Runtime stats:[/dim] {runtime}")
+
+        return "\n".join(lines)
+
+    def _build_right_column(self, stats: dict, all_accounts: list[str]) -> str:
+        """Build the right column with Transaction Statistics and Account Statistics sections."""
+        lines = []
+
         # Transaction Statistics Section
         lines.append("[bold]📊 Transaction Statistics[/bold]\n")
         lines.append(f"  [dim]Total transactions:[/dim] {stats.get('Txns', 'Unknown')}")
@@ -161,13 +182,6 @@ class HLedgerStatistics(Widget):
             lines.append("  [dim]Account breakdown:[/dim]")
             for account_type, count in sorted(account_types.items()):
                 lines.append(f"    • {account_type}: {count}")
-
-        lines.append("")
-
-        # Performance Statistics Section
-        lines.append("[bold]⚡ Performance[/bold]\n")
-        runtime = stats.get("Runtime stats", "Unknown")
-        lines.append(f"  [dim]Runtime stats:[/dim] {runtime}")
 
         return "\n".join(lines)
 

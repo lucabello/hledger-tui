@@ -6,7 +6,7 @@ default:
 
 # Lint the codebase using ruff
 [group("dev")]
-lint:
+lint: && format
     # Lint the code
     ruff check
     # Run static checks
