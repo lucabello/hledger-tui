@@ -433,6 +433,7 @@ class HLedger:
         # Build hledger command arguments
         hledger_args = {
             "_tty_out": False,
+            "market": True,  # Unify to one currency for simplicity
         }
         # Use provided period or fallback to self.period
         period_to_use = period if period is not None else self.period.value
