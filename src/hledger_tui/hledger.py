@@ -41,6 +41,25 @@ class AccountHistoricalBalance:
     balances: List[CategoricalBalance]  # List of period + balance
 
 
+@dataclass
+class Posting:
+    """A single posting within a transaction."""
+
+    account: str
+    amount: str
+    total: str
+
+
+@dataclass
+class Transaction:
+    """A transaction with multiple postings."""
+
+    txnidx: str
+    date: str
+    description: str
+    postings: List[Posting]
+
+
 class HLedgerPeriod:
     """An HLedger period based on a fixed unit (e.g., '1 month ago').
 
@@ -414,7 +433,7 @@ class HLedger:
 
     def register(
         self, account: str, tag: Optional[str] = None, period: Optional[str] = None, **kwargs
-    ) -> str:
+    ) -> List[Transaction]:
         """Run 'hledger register' for the given account and optional tag filter.
 
         Args:
@@ -425,12 +444,13 @@ class HLedger:
             **kwargs: Additional arguments to pass to hledger register
 
         Returns:
-            The output from hledger register command as a string
+            List of Transaction objects with structured data
         """
         # Build hledger command arguments
         hledger_args = {
             "_tty_out": False,
             "market": True,  # Unify to one currency for simplicity
+            "output_format": "csv",
         }
         # Use provided period or fallback to self.period
         # period="" means explicitly no period filter
@@ -452,7 +472,47 @@ class HLedger:
             **hledger_args,
             **kwargs,
         )
-        return raw_register.strip()
+        
+        # Parse CSV output into structured data
+        return self._parse_register_csv(raw_register)
+
+    @staticmethod
+    def _parse_register_csv(csv_data: str) -> List[Transaction]:
+        """Parse CSV output from hledger register into Transaction objects.
+        
+        Args:
+            csv_data: Raw CSV string from hledger register
+            
+        Returns:
+            List of Transaction objects, grouped by txnidx
+        """
+        csv_reader = csv.DictReader(StringIO(csv_data))
+        transactions_dict: dict[str, Transaction] = {}
+        
+        for row in csv_reader:
+            txnidx = row["txnidx"]
+            
+            # Create posting for this row
+            posting = Posting(
+                account=row["account"],
+                amount=row["amount"],
+                total=row["total"],
+            )
+            
+            # If transaction doesn't exist yet, create it
+            if txnidx not in transactions_dict:
+                transactions_dict[txnidx] = Transaction(
+                    txnidx=txnidx,
+                    date=row["date"],
+                    description=row["description"],
+                    postings=[],
+                )
+            
+            # Add posting to transaction
+            transactions_dict[txnidx].postings.append(posting)
+        
+        # Return transactions in order
+        return list(transactions_dict.values())
 
     def cycle_depth(self) -> None:
         """Cyclically increase the query depth, wrapping back to 1 after reaching the max."""

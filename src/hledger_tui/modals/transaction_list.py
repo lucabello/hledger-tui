@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -6,7 +6,7 @@ from textual.containers import Vertical, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Static
 
-from hledger_tui.hledger import HLedger
+from hledger_tui.hledger import HLedger, Transaction
 
 
 class ModalTransactionList(ModalScreen):
@@ -95,12 +95,39 @@ class ModalTransactionList(ModalScreen):
 
             content_widget = self.query_one("#transaction-content", Static)
             if transactions:
-                content_widget.update(transactions)
+                formatted_text = self._format_transactions(transactions)
+                content_widget.update(formatted_text)
             else:
                 content_widget.update("No transactions found for this account.")
         except Exception as e:
             content_widget = self.query_one("#transaction-content", Static)
             content_widget.update(f"Error loading transactions: {str(e)}")
+
+    @staticmethod
+    def _format_transactions(transactions: List[Transaction]) -> str:
+        """Format transactions into a readable text format.
+        
+        Args:
+            transactions: List of Transaction objects to format
+            
+        Returns:
+            Formatted string with transactions separated by blank lines
+        """
+        lines = []
+        
+        for transaction in transactions:
+            # Add transaction header: date and description
+            lines.append(f"{transaction.date} {transaction.description}")
+            
+            # Add each posting indented
+            for posting in transaction.postings:
+                # Align account and amount nicely
+                lines.append(f"    {posting.account:<50} {posting.amount:>15} {posting.total:>15}")
+            
+            # Add blank line between transactions
+            lines.append("")
+        
+        return "\n".join(lines)
 
     def action_close_modal(self) -> None:
         """Close the modal."""
