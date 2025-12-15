@@ -49,7 +49,7 @@ class BaseHLedgerTab(Widget):
         pass
 
     @override
-    def check_action(self, action: str, _: tuple[object, ...]) -> bool | None:
+    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
         """Check if action is allowed based on current state.
 
         Prevents period/depth actions when a tag is selected.

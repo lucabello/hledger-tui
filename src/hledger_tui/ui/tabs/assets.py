@@ -85,7 +85,7 @@ class HLedgerAssetsTab(Widget):
         hledger_assets.update_plot()
 
     @override
-    def check_action(self, action: str, _: tuple[object, ...]) -> bool | None:
+    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
         """Check if an action may run."""
         if action == "set_period_unit" and self._selected_tag:
             return False

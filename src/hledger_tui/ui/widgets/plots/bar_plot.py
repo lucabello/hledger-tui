@@ -59,7 +59,7 @@ class BarPlot(BasePlot):
         self.plt.bar(
             self.categories,
             self.values,
-            orientation="h",
+            orientation="horizontal",
             color=self.color.triplet,
         )
 

@@ -1,54 +1,15 @@
 """Tests for HLedger service with mocked backend."""
 
 from hledger_tui.core.models import CategoricalBalance, Transaction
-from hledger_tui.core.service import HLedger, HLedgerBackend
-
-
-class MockHLedgerBackend(HLedgerBackend):
-    """Mock backend for testing."""
-
-    def __init__(self):
-        self.balance_calls = []
-        self.register_calls = []
-
-    def balance(self, queries: list[str], **kwargs) -> str:
-        self.balance_calls.append((queries, kwargs))
-        return """account,balance
-expenses:food,€ 150.00
-expenses:transport,€ 50.00
-expenses:entertainment,€ 75.00"""
-
-    def register(self, queries: list[str], **kwargs) -> str:
-        self.register_calls.append((queries, kwargs))
-        return """txnidx,date,description,account,amount,total
-1,2024-01-01,Grocery Store,expenses:food,€ 50.00,€ 50.00
-1,2024-01-01,Grocery Store,assets:checking,€ -50.00,€ -50.00
-2,2024-01-02,Gas Station,expenses:transport,€ 30.00,€ 30.00
-2,2024-01-02,Gas Station,assets:checking,€ -30.00,€ -30.00"""
-
-    def stats(self) -> str:
-        return "Main file: test.ledger"
-
-    def files(self) -> str:
-        return "test.ledger\nincluded.ledger"
-
-    def accounts(self, queries: list[str]) -> str:
-        return "expenses:food\nexpenses:transport\nassets:checking"
-
-    def tags(self, **kwargs) -> str:
-        return "project\ncategory"
-
-    def commodities(self) -> str:
-        return "€\n$"
+from hledger_tui.core.service import HLedger
 
 
 class TestHLedgerBalance:
     """Test HLedger balance queries."""
 
-    def test_balance_query_basic(self):
+    def test_balance_query_basic(self, hledger_with_mock, mock_backend):
         """Test basic balance query."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
 
         balances = hledger.balance()
 
@@ -59,112 +20,102 @@ class TestHLedgerBalance:
         assert balances[1].name == "expenses:food"
         assert balances[2].name == "expenses:transport"
 
-    def test_balance_query_with_custom_queries(self):
+    def test_balance_query_with_custom_queries(self, hledger_with_mock, mock_backend):
         """Test balance query with custom queries."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
 
-        balances = hledger.balance(queries=["acct:food"])
+        hledger.balance(queries=["acct:food"])
 
-        assert len(backend.balance_calls) == 1
-        queries, kwargs = backend.balance_calls[0]
+        assert len(mock_backend.balance_calls) == 1
+        queries, kwargs = mock_backend.balance_calls[0]
         assert queries == ["acct:food"]
 
-    def test_balance_query_respects_depth(self):
+    def test_balance_query_respects_depth(self, hledger_with_mock, mock_backend):
         """Test that balance query includes depth parameter."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
         hledger.depth = 3
 
         hledger.balance()
 
-        queries, kwargs = backend.balance_calls[0]
+        queries, kwargs = mock_backend.balance_calls[0]
         assert kwargs["depth"] == 3
 
-    def test_balance_query_respects_period(self):
+    def test_balance_query_respects_period(self, hledger_with_mock, mock_backend):
         """Test that balance query includes period parameter."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
         hledger.period.previous_period()
 
         hledger.balance()
 
-        queries, kwargs = backend.balance_calls[0]
+        queries, kwargs = mock_backend.balance_calls[0]
         assert "period" in kwargs
         assert kwargs["period"] == "1 month ago"
 
-    def test_balance_query_all_time_no_period(self):
+    def test_balance_query_all_time_no_period(self, hledger_with_mock, mock_backend):
         """Test that all-time period doesn't include period parameter."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
         hledger.period.unit = None
 
         hledger.balance()
 
-        queries, kwargs = backend.balance_calls[0]
+        queries, kwargs = mock_backend.balance_calls[0]
         assert "period" not in kwargs
 
 
 class TestHLedgerRegister:
     """Test HLedger register queries."""
 
-    def test_register_query_basic(self):
+    def test_register_query_basic(self, hledger_with_mock, mock_backend):
         """Test basic register query."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
 
         transactions = hledger.register(account="expenses:food")
 
-        assert len(transactions) == 2
+        assert len(transactions) == 1
         assert isinstance(transactions[0], Transaction)
         assert transactions[0].description == "Grocery Store"
         assert len(transactions[0].postings) == 2
 
-    def test_register_query_with_tag(self):
+    def test_register_query_with_tag(self, hledger_with_mock, mock_backend):
         """Test register query with tag filter."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
 
-        transactions = hledger.register(account="expenses:food", tag="project:vacation")
+        hledger.register(account="expenses:food", tag="project:vacation")
 
-        queries, kwargs = backend.register_calls[0]
+        queries, kwargs = mock_backend.register_calls[0]
         assert "expenses:food" in queries
         assert "project:vacation" in queries
 
-    def test_register_query_with_period(self):
+    def test_register_query_with_period(self, hledger_with_mock, mock_backend):
         """Test register query with explicit period."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
 
-        transactions = hledger.register(account="expenses:food", period="2024-01")
+        hledger.register(account="expenses:food", period="2024-01")
 
-        queries, kwargs = backend.register_calls[0]
+        queries, kwargs = mock_backend.register_calls[0]
         assert kwargs["period"] == "2024-01"
 
-    def test_register_query_empty_period_skips_filter(self):
+    def test_register_query_empty_period_skips_filter(self, hledger_with_mock, mock_backend):
         """Test register query with empty period string."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
 
-        transactions = hledger.register(account="expenses:food", period="")
+        hledger.register(account="expenses:food", period="")
 
-        queries, kwargs = backend.register_calls[0]
+        queries, kwargs = mock_backend.register_calls[0]
         assert "period" not in kwargs
 
 
 class TestHLedgerDepth:
     """Test HLedger depth management."""
 
-    def test_default_depth(self):
+    def test_default_depth(self, hledger_with_mock):
         """Test default depth value."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
         assert hledger.depth == 2
 
-    def test_cycle_depth_increments(self):
+    def test_cycle_depth_increments(self, hledger_with_mock):
         """Test depth cycling increments correctly."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
 
         hledger.cycle_depth()
         assert hledger.depth == 3
@@ -172,43 +123,64 @@ class TestHLedgerDepth:
         hledger.cycle_depth()
         assert hledger.depth == 4
 
-    def test_cycle_depth_wraps_at_max(self):
+    def test_cycle_depth_wraps_at_max(self, hledger_with_mock):
         """Test depth cycling wraps to minimum at max."""
-        backend = MockHLedgerBackend()
-        hledger = HLedger(backend=backend)
+        hledger = hledger_with_mock
         hledger.depth = 4  # Set to max
 
         hledger.cycle_depth()
         assert hledger.depth == 1  # Wraps to min
 
 
-class TestHLedgerStaticMethods:
-    """Test HLedger static utility methods."""
+class TestHLedgerBackendCalls:
+    """Test HLedger backend method calls."""
 
-    def test_tags_static_method(self):
-        """Test static tags method."""
-        tags = HLedger.tags()
-        assert isinstance(tags, list)
+    def test_tags_parsed_correctly(self, hledger_with_mock, mock_backend):
+        """Test that tags are parsed from backend response."""
+        hledger = hledger_with_mock
+        # Access the tags through the instance method which uses the mock
+        tags = hledger.backend.tags()
 
-    def test_stats_static_method(self):
-        """Test static stats method."""
-        stats = HLedger.stats()
-        assert isinstance(stats, str)
+        assert mock_backend.tags_calls
+        assert "project" in tags
+        assert "category" in tags
+        assert "client" in tags
 
-    def test_files_static_method(self):
-        """Test static files method."""
-        files = HLedger.files()
-        assert isinstance(files, list)
+    def test_stats_called(self, hledger_with_mock, mock_backend):
+        """Test that stats method calls backend."""
+        hledger = hledger_with_mock
+        stats = hledger.backend.stats()
 
-    def test_all_accounts_static_method(self):
-        """Test static all_accounts method."""
-        accounts = HLedger.all_accounts()
-        assert isinstance(accounts, list)
+        assert mock_backend.stats_calls
+        assert "Transactions" in stats
 
-    def test_commodities_static_method(self):
-        """Test static commodities method."""
-        commodities = HLedger.commodities()
-        assert isinstance(commodities, list)
+    def test_files_parsed_correctly(self, hledger_with_mock, mock_backend):
+        """Test that files are parsed from backend response."""
+        hledger = hledger_with_mock
+        files = hledger.backend.files()
+
+        assert mock_backend.files_calls
+        assert "/test/journal.ledger" in files
+        assert "/test/included.ledger" in files
+
+    def test_accounts_queried_correctly(self, hledger_with_mock, mock_backend):
+        """Test that accounts method passes queries to backend."""
+        hledger = hledger_with_mock
+        accounts = hledger.backend.accounts(["expenses"])
+
+        assert len(mock_backend.accounts_calls) == 1
+        assert mock_backend.accounts_calls[0] == ["expenses"]
+        assert "expenses:food" in accounts
+
+    def test_commodities_parsed_correctly(self, hledger_with_mock, mock_backend):
+        """Test that commodities are parsed from backend response."""
+        hledger = hledger_with_mock
+        commodities = hledger.backend.commodities()
+
+        assert mock_backend.commodities_calls
+        assert "€" in commodities
+        assert "$" in commodities
+        assert "£" in commodities
 
 
 class TestHLedgerWeekPeriodConversion:

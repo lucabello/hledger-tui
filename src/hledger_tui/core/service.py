@@ -274,7 +274,7 @@ class HLedger:
         if self.period.value is not None:
             hledger_args["period"] = self.period.value
 
-        raw_balances = self.backend.balance(account, **hledger_args, **kwargs)
+        raw_balances = self.backend.balance([account], **hledger_args, **kwargs)
         csv_reader = csv.reader(StringIO(raw_balances))
         header_row: bool = True
         buckets: List[str] = []  # Time buckets for each subdivision in the period
