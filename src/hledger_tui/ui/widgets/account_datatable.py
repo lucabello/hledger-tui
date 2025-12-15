@@ -6,7 +6,7 @@ from textual.widget import Widget
 from textual.widgets import DataTable
 from typing_extensions import override
 
-from hledger_tui.hledger import CategoricalBalance
+from hledger_tui.core import CategoricalBalance
 
 
 class AccountsDataTable(DataTable):

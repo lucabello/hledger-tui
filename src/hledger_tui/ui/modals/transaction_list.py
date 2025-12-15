@@ -6,7 +6,9 @@ from textual.containers import Vertical, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Static
 
-from hledger_tui.hledger import HLedger, Transaction
+from hledger_tui.core import HLedger, Transaction
+from hledger_tui.utils import format_transactions_rich
+from hledger_tui.utils import format_transactions_rich
 
 
 class ModalTransactionList(ModalScreen):
@@ -95,41 +97,13 @@ class ModalTransactionList(ModalScreen):
 
             content_widget = self.query_one("#transaction-content", Static)
             if transactions:
-                formatted_text = self._format_transactions(transactions)
+                formatted_text = format_transactions_rich(transactions)
                 content_widget.update(formatted_text)
             else:
                 content_widget.update("No transactions found for this account.")
         except Exception as e:
             content_widget = self.query_one("#transaction-content", Static)
             content_widget.update(f"Error loading transactions: {str(e)}")
-
-    @staticmethod
-    def _format_transactions(transactions: List[Transaction]) -> str:
-        """Format transactions into a readable text format with Rich markup.
-
-        Args:
-            transactions: List of Transaction objects to format
-
-        Returns:
-            Formatted string with transactions separated by blank lines, using Rich markup for styling
-        """
-        lines = []
-
-        for transaction in transactions:
-            # Add transaction header: date (dim) and description (bold)
-            lines.append(f"[dim]{transaction.date}[/dim] [bold]{transaction.description}[/bold]")
-
-            # Add each posting indented
-            for posting in transaction.postings:
-                # Align account and amount nicely, with total dimmed
-                lines.append(
-                    f"    {posting.account:<50} {posting.amount:>15} [dim]{posting.total:>15}[/dim]"
-                )
-
-            # Add blank line between transactions
-            lines.append("")
-
-        return "\n".join(lines)
 
     def action_close_modal(self) -> None:
         """Close the modal."""

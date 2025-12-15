@@ -1,0 +1,61 @@
+"""Data models for HLedger TUI application."""
+
+from dataclasses import dataclass
+from typing import ClassVar, List
+
+from hledger_tui.config import config
+
+
+@dataclass
+class CategoricalBalance:
+    """A data point containing a name (e.g., account, time period, etc.) and a numerical balance.
+
+    Note: the balance must include the currency.
+    """
+
+    DEFAULT_COMMODITY: ClassVar[str] = config.default_commodity
+
+    name: str
+    _balance: str
+
+    @property
+    def balance(self) -> str:
+        if self._balance == "0":
+            return f"{self.DEFAULT_COMMODITY} 0"
+        return self._balance
+
+    @property
+    def commodity(self) -> str:
+        """Return the commodity from the given balance."""
+        return self.balance.split()[0]
+
+    @property
+    def balance_float(self) -> float:
+        return float(self.balance.split()[-1])
+
+
+@dataclass
+class AccountHistoricalBalance:
+    """Historical balance data for a single account across multiple periods."""
+    
+    name: str  # Name of the account
+    balances: List[CategoricalBalance]  # List of period + balance
+
+
+@dataclass
+class Posting:
+    """A single posting within a transaction."""
+
+    account: str
+    amount: str
+    total: str
+
+
+@dataclass
+class Transaction:
+    """A transaction with multiple postings."""
+
+    txnidx: str
+    date: str
+    description: str
+    postings: List[Posting]

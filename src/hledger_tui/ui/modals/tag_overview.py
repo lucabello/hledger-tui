@@ -7,8 +7,8 @@ from textual.containers import Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Footer
 
-from hledger_tui.hledger import CategoricalBalance, HLedger
-from hledger_tui.widgets.hledger_balance import HLedgerBalance
+from hledger_tui.core import CategoricalBalance, HLedger
+from hledger_tui.ui.widgets.hledger_balance import HLedgerBalance
 
 
 class ModalTagOverview(ModalScreen):
@@ -96,8 +96,8 @@ class ModalTagOverview(ModalScreen):
     @work
     async def action_show_transactions(self) -> None:
         """Show transactions for the selected account with the tag filter."""
-        from hledger_tui.modals.transaction_list import ModalTransactionList
-        from hledger_tui.widgets._account_datatable import AccountsDataTable
+        from hledger_tui.ui.modals.transaction_list import ModalTransactionList
+        from hledger_tui.ui.widgets.account_datatable import AccountsDataTable
 
         table = self.query_one(AccountsDataTable)
         selected_account = table.selected_account

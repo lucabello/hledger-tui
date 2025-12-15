@@ -6,11 +6,11 @@ from textual.binding import Binding
 from textual.widget import Widget
 from typing_extensions import override
 
-from hledger_tui.hledger import AccountHistoricalBalance, CategoricalBalance, HLedger
-from hledger_tui.modals.account_overview import ModalAccountOverview
-from hledger_tui.modals.tag_overview import ModalTagOverview
-from hledger_tui.widgets._account_datatable import AccountsDataTable
-from hledger_tui.widgets.hledger_assets import HLedgerAssets
+from hledger_tui.core import AccountHistoricalBalance, CategoricalBalance, HLedger
+from hledger_tui.ui.modals.account_overview import ModalAccountOverview
+from hledger_tui.ui.modals.tag_overview import ModalTagOverview
+from hledger_tui.ui.widgets.account_datatable import AccountsDataTable
+from hledger_tui.ui.widgets.hledger_assets import HLedgerAssets
 
 
 class HLedgerAssetsTab(Widget):
@@ -84,7 +84,7 @@ class HLedgerAssetsTab(Widget):
         hledger_assets.update_plot()
 
     @override
-    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+    def check_action(self, action: str, _: tuple[object, ...]) -> bool | None:
         """Check if an action may run."""
         if action == "set_period_unit" and self._selected_tag:
             return False

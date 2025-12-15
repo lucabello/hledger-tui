@@ -6,9 +6,9 @@ from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import ModalScreen
 
-from hledger_tui.hledger import CategoricalBalance, HLedger
-from hledger_tui.widgets.grid_footer import GridFooter
-from hledger_tui.widgets.hledger_balance import HLedgerBalance
+from hledger_tui.core import CategoricalBalance, HLedger
+from hledger_tui.ui.widgets.grid_footer import GridFooter
+from hledger_tui.ui.widgets.hledger_balance import HLedgerBalance
 
 
 class ModalAccountOverview(ModalScreen):
@@ -142,8 +142,8 @@ class ModalAccountOverview(ModalScreen):
     @work
     async def action_show_transactions(self) -> None:
         """Show transactions for the selected period and account."""
-        from hledger_tui.modals.transaction_list import ModalTransactionList
-        from hledger_tui.widgets._account_datatable import AccountsDataTable
+        from hledger_tui.ui.modals.transaction_list import ModalTransactionList
+        from hledger_tui.ui.widgets.account_datatable import AccountsDataTable
 
         table = self.query_one(AccountsDataTable)
         selected_period = table.selected_account

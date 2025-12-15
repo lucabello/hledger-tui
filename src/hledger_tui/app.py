@@ -5,9 +5,9 @@ from textual.widgets import (
     TabPane,
 )
 
-from hledger_tui.tabs.assets import HLedgerAssetsTab
-from hledger_tui.tabs.balance import HLedgerBalanceTab
-from hledger_tui.tabs.statistics import HLedgerStatisticsTab
+from hledger_tui.ui.tabs.assets import HLedgerAssetsTab
+from hledger_tui.ui.tabs.balance import HLedgerBalanceTab
+from hledger_tui.ui.tabs.statistics import HLedgerStatisticsTab
 
 
 class HLedgerViewApp(App):

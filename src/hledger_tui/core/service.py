@@ -1,222 +1,139 @@
+"""Service layer for HLedger operations with backend abstraction."""
+
 import csv
-from dataclasses import dataclass
+import re
+from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from io import StringIO
-from typing import ClassVar, Final, List, Literal, Optional
+from typing import ClassVar, Final, List, Optional
 
 import sh
 
+from hledger_tui.config import config
+from hledger_tui.core.models import (
+    AccountHistoricalBalance,
+    CategoricalBalance,
+    Posting,
+    Transaction,
+)
+from hledger_tui.core.period import HLedgerPeriod
 
-@dataclass
-class CategoricalBalance:
-    """A data point containing a name (e.g., account, time period, etc.) and a numerical balance.
 
-    Note: the balance must include the currency.
+class HLedgerBackend(ABC):
+    """Abstract interface for HLedger operations.
+    
+    This abstraction allows for different implementations (shell, API, mock for testing).
     """
 
-    DEFAULT_COMMODITY: ClassVar[str] = "€"
+    @abstractmethod
+    def balance(self, queries: List[str], **kwargs) -> str:
+        """Execute hledger balance command and return raw output."""
+        pass
 
-    name: str
-    _balance: str
+    @abstractmethod
+    def register(self, queries: List[str], **kwargs) -> str:
+        """Execute hledger register command and return raw output."""
+        pass
 
-    @property
-    def balance(self) -> str:
-        if self._balance == "0":
-            return f"{self.DEFAULT_COMMODITY} 0"
-        return self._balance
+    @abstractmethod
+    def stats(self) -> str:
+        """Execute hledger stats command and return raw output."""
+        pass
 
-    @property
-    def commodity(self) -> str:
-        """Return the commodity from the given balance."""
-        return self.balance.split()[0]
+    @abstractmethod
+    def files(self) -> str:
+        """Execute hledger files command and return raw output."""
+        pass
 
-    @property
-    def balance_float(self) -> float:
-        return float(self.balance.split()[-1])
+    @abstractmethod
+    def accounts(self, queries: List[str]) -> str:
+        """Execute hledger accounts command and return raw output."""
+        pass
 
+    @abstractmethod
+    def tags(self, **kwargs) -> str:
+        """Execute hledger tags command and return raw output."""
+        pass
 
-@dataclass
-class AccountHistoricalBalance:
-    name: str  # Name of the account
-    balances: List[CategoricalBalance]  # List of period + balance
-
-
-@dataclass
-class Posting:
-    """A single posting within a transaction."""
-
-    account: str
-    amount: str
-    total: str
-
-
-@dataclass
-class Transaction:
-    """A transaction with multiple postings."""
-
-    txnidx: str
-    date: str
-    description: str
-    postings: List[Posting]
+    @abstractmethod
+    def commodities(self) -> str:
+        """Execute hledger commodities command and return raw output."""
+        pass
 
 
-class HLedgerPeriod:
-    """An HLedger period based on a fixed unit (e.g., '1 month ago').
+class ShellHLedgerBackend(HLedgerBackend):
+    """Implementation using sh library to call hledger shell commands."""
 
-    Args:
-        unit: The time unit used in the period, or None for all time
-        offset: How many time units in the past (negative ints) or in the future (positive ints)
-    """
+    def balance(self, queries: List[str], **kwargs) -> str:
+        return sh.hledger.balance(queries, **kwargs)  # pyright: ignore
 
-    unit: str | None
-    _offset: int
+    def register(self, queries: List[str], **kwargs) -> str:
+        return sh.hledger.register(queries, **kwargs)  # pyright: ignore
 
-    def __init__(
-        self,
-        unit: str | None = "months",
-        subdivision: str = "weekly",
-        offset: int = 0,
-    ):
-        self.unit = unit
-        self.subdivision = subdivision
-        self._offset = offset
+    def stats(self) -> str:
+        return sh.hledger.stats(_tty_out=False).strip()  # pyright: ignore
 
-        self.subdivision_offset: int = 0
+    def files(self) -> str:
+        return sh.hledger.files(_tty_out=False).strip()  # pyright: ignore
 
-    def __eq__(self, other: object) -> bool:
-        return (
-            isinstance(other, HLedgerPeriod)
-            and self.unit == other.unit
-            and self._offset == other._offset
-        )
+    def accounts(self, queries: List[str]) -> str:
+        return sh.hledger.accounts(queries)  # pyright: ignore
 
-    @property
-    def singular_unit(self) -> str:
-        """The current unit used by the HLedgerPeriod, but in singular form."""
-        if self.unit is None:
-            return "all time"
-        return self.unit[:-1]
+    def tags(self, **kwargs) -> str:
+        return sh.hledger.tags(**kwargs)  # pyright: ignore
 
-    @property
-    def value(self) -> str | None:
-        """HLedger-compatible period string, or None for all time."""
-        if self.unit is None:
-            return None
-        direction: Literal["ago", "ahead"] = "ago" if self._offset <= 0 else "ahead"
-        # Drop the 's' from the unit if it's 1 - not necessary for HLedger, just for aesthetics
-        pretty_unit = self.unit[:-1] if abs(self._offset) <= 1 else self.unit
-        if self._offset == 0:
-            return f"this {pretty_unit}"
-        return f"{abs(self._offset)} {pretty_unit} {direction}"
-
-    def _get_period_date(self) -> str:
-        """Calculate the actual date/period this HLedgerPeriod refers to."""
-        if self.unit is None:
-            return "All Time"
-
-        today = datetime.now()
-
-        if self.unit == "weeks":
-            # Calculate the start of the week (Monday)
-            days_since_monday = today.weekday()
-            start_of_this_week = today - timedelta(days=days_since_monday)
-            # Apply offset (negative offset means past, positive means future)
-            target_week_start = start_of_this_week + timedelta(weeks=self._offset)
-            return target_week_start.strftime("%Y/%m/%d")
-
-        elif self.unit == "months":
-            # Calculate target month
-            target_month = today.month + self._offset
-            target_year = today.year
-
-            # Handle year overflow/underflow
-            while target_month > 12:
-                target_month -= 12
-                target_year += 1
-            while target_month < 1:
-                target_month += 12
-                target_year -= 1
-
-            return f"{target_year:04d}/{target_month:02d}"
-
-        elif self.unit == "quarters":
-            # Calculate target quarter
-            current_quarter = (today.month - 1) // 3 + 1
-            target_quarter = current_quarter + self._offset
-            target_year = today.year
-
-            # Handle year overflow/underflow
-            while target_quarter > 4:
-                target_quarter -= 4
-                target_year += 1
-            while target_quarter < 1:
-                target_quarter += 4
-                target_year -= 1
-
-            return f"{target_year:04d}/Q{target_quarter}"
-
-        elif self.unit == "years":
-            target_year = today.year + self._offset
-            return f"{target_year:04d}"
-
-        return ""
-
-    @property
-    def pretty_value(self) -> str:
-        """Human-readable period string with actual date/period information."""
-        if self.unit is None:
-            return "All Time"
-
-        base_value = self.value or ""
-        date_info = self._get_period_date()
-
-        if date_info:
-            return f"{base_value} ({date_info})"
-        return base_value
-
-    def previous_period(self):
-        """Decrease the period offset by one."""
-        self._offset -= 1
-
-    def next_period(self):
-        """Increase the period offset by one."""
-        self._offset += 1
+    def commodities(self) -> str:
+        return sh.hledger.commodities(_tty_out=False).strip()  # pyright: ignore
 
 
 class HLedger:
-    """Interact with HLedger to extract data from a Ledger file."""
+    """High-level service for interacting with HLedger to extract data from a Ledger file.
+    
+    This class provides a clean interface for querying HLedger data and parsing results.
+    """
 
-    DEFAULT_DEPTH_MIN: Final[int] = 1
-    DEFAULT_DEPTH: Final[int] = 2
-    DEFAULT_DEPTH_MAX: Final[int] = 4
+    DEFAULT_DEPTH_MIN: Final[int] = config.default_depth_min
+    DEFAULT_DEPTH: Final[int] = config.default_depth
+    DEFAULT_DEPTH_MAX: Final[int] = config.default_depth_max
     DEFAULT_PERIOD: Final[HLedgerPeriod] = HLedgerPeriod()
-    DEFAULT_HLEDGER_QUERIES: ClassVar[List[str]] = [
-        "acct:expenses",
-        "not:acct:financial",
-        "not:acct:home:rent",
-        "not:acct:home:utilities",
-    ]
-    DEFAULT_HLEDGER_TAG_QUERIES: ClassVar[List[str]] = [
-        "acct:expenses",
-    ]
-    DEFAULT_HLEDGER_ASSETS_QUERIES: ClassVar[List[str]] = [
-        "acct:assets",
-        "acct:liabilities",
-        "acct:budget",
-    ]
+    DEFAULT_HLEDGER_QUERIES: ClassVar[List[str]] = config.default_queries
+    DEFAULT_HLEDGER_TAG_QUERIES: ClassVar[List[str]] = config.tag_queries
+    DEFAULT_HLEDGER_ASSETS_QUERIES: ClassVar[List[str]] = config.assets_queries
 
     queries: List[str]  # Series of HLedger queries
     depth: int  # The --depth to use in HLedger commands
     period: HLedgerPeriod
+    backend: HLedgerBackend
 
-    def __init__(self, queries: Optional[List[str]] = None):
+    def __init__(
+        self,
+        queries: Optional[List[str]] = None,
+        backend: Optional[HLedgerBackend] = None,
+    ):
+        """Initialize HLedger service.
+        
+        Args:
+            queries: List of HLedger query strings. Defaults to DEFAULT_HLEDGER_QUERIES.
+            backend: Backend implementation for executing HLedger commands. 
+                    Defaults to ShellHLedgerBackend.
+        """
         self.queries = queries if queries is not None else self.DEFAULT_HLEDGER_QUERIES
         self.depth = self.DEFAULT_DEPTH
         self.period = HLedgerPeriod()
+        self.backend = backend or ShellHLedgerBackend()
 
     def assets(
         self, queries: Optional[List[str]] = None, **kwargs
     ) -> List[AccountHistoricalBalance]:
+        """Get historical balance data for assets/liabilities accounts.
+        
+        Args:
+            queries: Optional list of query filters. Uses self.queries if not provided.
+            **kwargs: Additional arguments passed to the backend.
+            
+        Returns:
+            List of AccountHistoricalBalance objects with time-series data.
+        """
         # Build hledger command arguments
         hledger_args = {
             "depth": self.depth,
@@ -235,11 +152,7 @@ class HLedger:
         if self.period.value is not None:
             hledger_args["period"] = self.period.value
 
-        raw_balances = sh.hledger.balance(  # pyright: ignore
-            queries or self.queries,
-            **hledger_args,
-            **kwargs,
-        )
+        raw_balances = self.backend.balance(queries or self.queries, **hledger_args, **kwargs)
         csv_reader = csv.reader(StringIO(raw_balances))
         # Process the header row
         header_row: bool = True
@@ -267,10 +180,14 @@ class HLedger:
         return sorted(balances, key=lambda b: b.name)
 
     def balance(self, queries: Optional[List[str]] = None, **kwargs) -> List[CategoricalBalance]:
-        """Run 'hledger balance'.
+        """Get current balance for accounts.
 
+        Args:
+            queries: Optional list of query filters. Uses self.queries if not provided.
+            **kwargs: Additional arguments passed to the backend.
+            
         Returns:
-
+            List of CategoricalBalance objects with current balance data.
         """
         # Get the balances from HLedger
         balances: List[CategoricalBalance] = []
@@ -286,11 +203,7 @@ class HLedger:
         if self.period.value is not None:
             hledger_args["period"] = self.period.value
 
-        raw_balances = sh.hledger.balance(  # pyright: ignore
-            queries or self.queries,
-            **hledger_args,
-            **kwargs,
-        )
+        raw_balances = self.backend.balance(queries or self.queries, **hledger_args, **kwargs)
         csv_reader = csv.reader(StringIO(raw_balances))
         next(csv_reader)  # Skip the header row
         for row in csv_reader:
@@ -298,14 +211,17 @@ class HLedger:
         return sorted(balances, key=lambda b: b.name)
 
     def tag_balance(self, tag: str, **kwargs) -> List[CategoricalBalance]:
-        """Run 'hledger balance'.
+        """Get balance data filtered by tag.
 
+        Args:
+            tag: Tag filter string (e.g., "tag:project=myproject")
+            **kwargs: Additional arguments passed to the backend.
+            
         Returns:
-
+            List of CategoricalBalance objects for the tag filter.
         """
-        # Get the balances from HLedger
         balances: List[CategoricalBalance] = []
-        raw_balances = sh.hledger.balance(  # pyright: ignore
+        raw_balances = self.backend.balance(
             [*self.DEFAULT_HLEDGER_TAG_QUERIES, tag],
             depth=self.depth,
             no_total=True,
@@ -323,13 +239,13 @@ class HLedger:
     def balance_over_time(
         self, account: str, historical: bool = False, **kwargs
     ) -> List[CategoricalBalance]:
-        """Return the result from 'hledger balance', but spread over a time subdivision.
+        """Get balance data for an account spread over time subdivisions.
 
         Args:
             account: The account to query
             historical: If True, shows cumulative historical balance at each point in time.
                        If False, shows balance changes within the period (non-cumulative).
-            **kwargs: Additional arguments to pass to hledger balance
+            **kwargs: Additional arguments passed to the backend.
 
         Returns:
             List of CategoricalBalance with time period and balance data
@@ -358,11 +274,7 @@ class HLedger:
         if self.period.value is not None:
             hledger_args["period"] = self.period.value
 
-        raw_balances = sh.hledger.balance(  # pyright: ignore
-            account,
-            **hledger_args,
-            **kwargs,
-        )
+        raw_balances = self.backend.balance(account, **hledger_args, **kwargs)
         csv_reader = csv.reader(StringIO(raw_balances))
         header_row: bool = True
         buckets: List[str] = []  # Time buckets for each subdivision in the period
@@ -380,12 +292,11 @@ class HLedger:
         for i in range(len(buckets)):
             balance_over_time.append(CategoricalBalance(buckets[i], balances[i]))
 
-        # return sorted(balance_over_time, key=lambda b: b.name)
         return balance_over_time
 
     def _account_depth(self) -> int:
         """Return the maximum account depth for the configured query."""
-        accounts = sh.hledger.accounts(self.queries).split("\n")  # pyright: ignore
+        accounts = self.backend.accounts(self.queries).split("\n")
         max_depth = max(len(account.split(":")) for account in accounts) + 1
         print(max_depth)
         return max_depth
@@ -393,43 +304,45 @@ class HLedger:
     @staticmethod
     def accounts_depth(accounts: List[str]) -> int:
         """Return the maximum account depth using the given accounts as query."""
-        raw_accounts = sh.hledger.accounts(accounts).split("\n")  # pyright: ignore
+        backend = ShellHLedgerBackend()
+        raw_accounts = backend.accounts(accounts).split("\n")
         max_depth = max(len(acc.split(":")) for acc in raw_accounts) + 1
         return max_depth
 
     @staticmethod
     def tags() -> List[str]:
         """Return the existing HLedger tags."""
-        raw_tags: List[str] = sh.hledger.tags(declared=True).split("\n")  # pyright: ignore
+        backend = ShellHLedgerBackend()
+        raw_tags: List[str] = backend.tags(declared=True).split("\n")
         tags = [t for t in raw_tags if t]
         return tags
 
     @staticmethod
     def stats() -> str:
         """Return the output from 'hledger stats'."""
-        return sh.hledger.stats(_tty_out=False).strip()  # pyright: ignore
+        backend = ShellHLedgerBackend()
+        return backend.stats()
 
     @staticmethod
     def files() -> List[str]:
         """Return the list of journal files."""
-        raw_files: str = sh.hledger.files(_tty_out=False).strip()  # pyright: ignore
+        backend = ShellHLedgerBackend()
+        raw_files: str = backend.files()
         return [f for f in raw_files.split("\n") if f]
 
     @staticmethod
     def all_accounts() -> List[str]:
         """Return all accounts in the journal."""
-        raw_accounts: str = sh.hledger.accounts(_tty_out=False).strip()  # pyright: ignore
+        backend = ShellHLedgerBackend()
+        raw_accounts: str = backend.accounts([]).strip()
         return [a for a in raw_accounts.split("\n") if a]
 
     @staticmethod
     def commodities() -> List[str]:
         """Return the list of commodities/currencies used."""
-        raw_commodities: str = sh.hledger.commodities(_tty_out=False).strip()  # pyright: ignore
+        backend = ShellHLedgerBackend()
+        raw_commodities: str = backend.commodities()
         return [c for c in raw_commodities.split("\n") if c]
-
-    # @staticmethod
-    # def print() -> str:
-    #     return sh.hledger.print(explicit=True, round="soft")  # pyright: ignore
 
     def register(
         self, account: str, tag: Optional[str] = None, period: Optional[str] = None, **kwargs
@@ -441,7 +354,7 @@ class HLedger:
             tag: Optional tag filter in the format "tag:key=value"
             period: Optional specific period to use instead of self.period.
                    Pass empty string "" to explicitly skip period filter.
-            **kwargs: Additional arguments to pass to hledger register
+            **kwargs: Additional arguments passed to the backend.
 
         Returns:
             List of Transaction objects with structured data
@@ -469,11 +382,7 @@ class HLedger:
         if tag:
             queries.append(tag)
 
-        raw_register = sh.hledger.register(  # pyright: ignore
-            queries,
-            **hledger_args,
-            **kwargs,
-        )
+        raw_register = self.backend.register(queries, **hledger_args, **kwargs)
 
         # Parse CSV output into structured data
         return self._parse_register_csv(raw_register)
@@ -488,8 +397,6 @@ class HLedger:
         Returns:
             Converted period string, or original if not in week format
         """
-        import re
-
         # Check if period matches ISO week format (YYYY-WNN)
         week_match = re.match(r"^(\d{4})-W(\d{2})$", period)
         if not week_match:

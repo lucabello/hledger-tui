@@ -1,0 +1,43 @@
+"""Base class for modal screens."""
+
+from typing import Optional
+
+from textual.binding import Binding
+from textual.screen import ModalScreen
+
+from hledger_tui.core import HLedger
+
+
+class BaseModal(ModalScreen):
+    """Base class for modal screens with common functionality.
+    
+    Provides standard close actions and HLedger instance management.
+    """
+
+    BINDINGS = [
+        Binding(key="q", action="close_modal", description="Close"),
+        Binding(key="escape", action="close_modal", description="Close"),
+    ]
+
+    def __init__(
+        self,
+        hledger: HLedger,
+        *,
+        name: Optional[str] = None,
+        id: Optional[str] = None,
+        classes: Optional[str] = None,
+    ):
+        """Initialize base modal.
+        
+        Args:
+            hledger: HLedger service instance
+            name: Screen name
+            id: Screen ID
+            classes: CSS classes
+        """
+        super().__init__(name=name, id=id, classes=classes)
+        self.hledger = hledger
+
+    def action_close_modal(self) -> None:
+        """Close the modal."""
+        self.dismiss()

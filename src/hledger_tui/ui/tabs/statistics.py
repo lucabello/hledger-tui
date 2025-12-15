@@ -3,8 +3,8 @@ from textual.app import ComposeResult
 from textual.widget import Widget
 from typing_extensions import override
 
-from hledger_tui.hledger import HLedger
-from hledger_tui.widgets.hledger_statistics import HLedgerStatistics
+from hledger_tui.core import HLedger
+from hledger_tui.ui.widgets.hledger_statistics import HLedgerStatistics
 
 
 class HLedgerStatisticsTab(Widget):
