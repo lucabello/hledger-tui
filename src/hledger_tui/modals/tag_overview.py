@@ -106,7 +106,12 @@ class ModalTagOverview(ModalScreen):
             return
 
         # Build the tag filter string
-        tag_filter = f"tag:{self._tag}={self._tag_value[1:]}"
+        # self._tag already contains "tag:key", so we just need to add "=value"
+        # Strip the leading "=" or ":" from tag_value if present
+        tag_value = self._tag_value
+        if tag_value.startswith("=") or tag_value.startswith(":"):
+            tag_value = tag_value[1:]
+        tag_filter = f"{self._tag}={tag_value}"
 
         await self.app.push_screen(
             ModalTransactionList(
