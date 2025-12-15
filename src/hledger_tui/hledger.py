@@ -412,6 +412,45 @@ class HLedger:
     # def print() -> str:
     #     return sh.hledger.print(explicit=True, round="soft")  # pyright: ignore
 
+    def register(
+        self, 
+        account: str, 
+        tag: Optional[str] = None, 
+        period: Optional[str] = None,
+        **kwargs
+    ) -> str:
+        """Run 'hledger register' for the given account and optional tag filter.
+        
+        Args:
+            account: The account to show transactions for
+            tag: Optional tag filter in the format "tag:key=value"
+            period: Optional specific period to use instead of self.period
+            **kwargs: Additional arguments to pass to hledger register
+            
+        Returns:
+            The output from hledger register command as a string
+        """
+        # Build hledger command arguments
+        hledger_args = {
+            "_tty_out": False,
+        }
+        # Use provided period or fallback to self.period
+        period_to_use = period if period is not None else self.period.value
+        if period_to_use is not None:
+            hledger_args["period"] = period_to_use
+        
+        # Build query list
+        queries = [account]
+        if tag:
+            queries.append(tag)
+        
+        raw_register = sh.hledger.register(  # pyright: ignore
+            queries,
+            **hledger_args,
+            **kwargs,
+        )
+        return raw_register.strip()
+
     def cycle_depth(self) -> None:
         """Cyclically increase the query depth, wrapping back to 1 after reaching the max."""
         if self.depth + 1 > self.DEFAULT_DEPTH_MAX:

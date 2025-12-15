@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from textual import work
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
@@ -35,6 +36,7 @@ class ModalAccountOverview(ModalScreen):
         Binding("Y", "set_period_subdivision('yearly')", "Yearly", priority=True),
         Binding("shift+down", "change_account(1)", "Next Account"),
         Binding("shift+up", "change_account(-1)", "Previous Account"),
+        Binding(key="enter", action="show_transactions", description="Transactions"),
         Binding(key="q", action="close_historical_modal", description="Close"),
         Binding(key="escape", action="close_historical_modal", description="Close"),
     ]
@@ -136,3 +138,25 @@ class ModalAccountOverview(ModalScreen):
         new_index: int = (selected_index + offset) % len(self._accounts)
         self._selected_account = self._accounts[new_index]
         self.update_data()
+
+    @work
+    async def action_show_transactions(self) -> None:
+        """Show transactions for the selected period and account."""
+        from hledger_tui.modals.transaction_list import ModalTransactionList
+        from hledger_tui.widgets._account_datatable import AccountsDataTable
+        
+        table = self.query_one(AccountsDataTable)
+        selected_period = table.selected_account
+        
+        if not selected_period:
+            return
+        
+        # Use the selected period name directly as the period filter
+        await self.app.push_screen(
+            ModalTransactionList(
+                hledger=self.hledger,
+                account=self._selected_account,
+                period=selected_period,
+                title=f"Transactions: {self._selected_account} ({selected_period})",
+            )
+        )

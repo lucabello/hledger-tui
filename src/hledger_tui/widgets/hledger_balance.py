@@ -1,6 +1,8 @@
-from typing import List
+from typing import List, Optional
 
+from textual import work
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, VerticalScroll
 from textual.widget import Widget
 from typing_extensions import override
@@ -11,7 +13,9 @@ from hledger_tui.widgets._plots import BarPlotScroll
 
 
 class HLedgerBalance(Widget):
-    BINDINGS = []
+    BINDINGS = [
+        Binding(key="enter", action="show_transactions", description="Transactions", show=True),
+    ]
     DEFAULT_CSS = """
     HLedgerBalance {
         height: auto;
@@ -37,6 +41,7 @@ class HLedgerBalance(Widget):
     """
 
     _hledger: HLedger
+    _tag_filter: Optional[str] = None
 
     def __init__(
         self,
@@ -47,6 +52,7 @@ class HLedgerBalance(Widget):
         classes: str | None = None,
     ) -> None:
         self.datatable_category_name: str = datatable_category_name
+        self._tag_filter = None
         super().__init__(
             name=name,
             id=id,
@@ -84,3 +90,27 @@ class HLedgerBalance(Widget):
             values=[b.balance_float for b in reversed(balances)],
         )
         bar_plot.update_label(plot_label)
+
+    @work
+    async def action_show_transactions(self) -> None:
+        """Show transactions for the selected account."""
+        from hledger_tui.modals.transaction_list import ModalTransactionList
+        
+        table = self.query_one(AccountsDataTable)
+        selected_account = table.selected_account
+        
+        if not selected_account:
+            return
+        
+        # Get hledger instance from parent context
+        # This will be populated by parent widgets/tabs
+        if not hasattr(self, '_hledger'):
+            return
+        
+        await self.app.push_screen(
+            ModalTransactionList(
+                hledger=self._hledger,
+                account=selected_account,
+                tag=self._tag_filter,
+            )
+        )

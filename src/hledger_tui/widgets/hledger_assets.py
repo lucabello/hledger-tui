@@ -1,6 +1,8 @@
 from typing import List
 
+from textual import work
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, VerticalScroll
 from textual.widget import Widget
 from typing_extensions import override
@@ -11,7 +13,9 @@ from hledger_tui.widgets._plots import PlotPlotScroll
 
 
 class HLedgerAssets(Widget):
-    BINDINGS = []
+    BINDINGS = [
+        Binding(key="enter", action="show_transactions", description="Transactions", show=True),
+    ]
     DEFAULT_CSS = """
     HLedgerAssets {
         height: auto;
@@ -114,3 +118,24 @@ class HLedgerAssets(Widget):
     ) -> None:
         """Handle account selection in the table."""
         self.update_plot(message.account)
+
+    @work
+    async def action_show_transactions(self) -> None:
+        """Show transactions for the selected account."""
+        from hledger_tui.modals.transaction_list import ModalTransactionList
+        
+        table = self.query_one(AccountsDataTable)
+        selected_account = table.selected_account
+        
+        if not selected_account:
+            return
+        
+        if not self._hledger:
+            return
+        
+        await self.app.push_screen(
+            ModalTransactionList(
+                hledger=self._hledger,
+                account=selected_account,
+            )
+        )

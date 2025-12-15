@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from textual import work
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
@@ -15,6 +16,7 @@ class ModalTagOverview(ModalScreen):
         Binding("d", "cycle_depth", "Depth"),
         Binding("shift+down", "change_account(1)", "Next Account"),
         Binding("shift+up", "change_account(-1)", "Previous Account"),
+        Binding(key="enter", action="show_transactions", description="Transactions"),
         Binding(key="q", action="close_modal", description="Close"),
         Binding(key="escape", action="close_modal", description="Close"),
     ]
@@ -90,3 +92,27 @@ class ModalTagOverview(ModalScreen):
         """Cycle through account depths and refresh the widgets accordingly."""
         self.hledger.cycle_depth()
         self.update_data()
+
+    @work
+    async def action_show_transactions(self) -> None:
+        """Show transactions for the selected account with the tag filter."""
+        from hledger_tui.modals.transaction_list import ModalTransactionList
+        from hledger_tui.widgets._account_datatable import AccountsDataTable
+        
+        table = self.query_one(AccountsDataTable)
+        selected_account = table.selected_account
+        
+        if not selected_account:
+            return
+        
+        # Build the tag filter string
+        tag_filter = f"tag:{self._tag}={self._tag_value[1:]}"
+        
+        await self.app.push_screen(
+            ModalTransactionList(
+                hledger=self.hledger,
+                account=selected_account,
+                tag=tag_filter,
+                title=f"Transactions: {selected_account} ({tag_filter})",
+            )
+        )

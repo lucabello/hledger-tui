@@ -68,6 +68,8 @@ class HLedgerBalanceTab(Widget):
         self._balances = self.hledger.balance()
         self._balances_accounts = [b.name for b in self._balances]
         hledger_balance = self.query_one(HLedgerBalance)
+        hledger_balance._hledger = self.hledger
+        hledger_balance._tag_filter = None
         hledger_balance.update_data(
             balances=self._balances,
             table_title=self.hledger.period.pretty_value,
@@ -79,6 +81,10 @@ class HLedgerBalanceTab(Widget):
         self._balances = self.hledger.tag_balance(tag=tag, pivot=tag)
         self._balances_accounts = [b.name for b in self._balances]
         hledger_balance = self.query_one(HLedgerBalance)
+        hledger_balance._hledger = self.hledger
+        # For tag pivot, the selected "account" is actually a tag value like "=value"
+        # We need to set the tag filter to be "tag:key=value" format
+        hledger_balance._tag_filter = tag
         hledger_balance.update_data(
             balances=self._balances,
             table_title=tag,
