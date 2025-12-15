@@ -23,7 +23,7 @@ class HLedgerBalanceTab(Widget):
         Binding(key="o", action="overview_modal", description="Overview"),
         Binding(key="left", action="previous_period", description="Previous Period", show=False),
         Binding(key="right", action="next_period", description="Next Period", show=False),
-        Binding("t", "tag_pivot_modal", "Tag Pivot"),
+        Binding("p", "tag_pivot_modal", "Tag Pivot"),
     ]
     DEFAULT_CSS = """
     HLedgerBalanceTab {

@@ -14,7 +14,7 @@ from hledger_tui.widgets._plots import PlotPlotScroll
 
 class HLedgerAssets(Widget):
     BINDINGS = [
-        Binding(key="enter", action="show_transactions", description="Transactions", show=True),
+        Binding(key="t", action="show_transactions", description="Transactions", show=True, priority=True),
     ]
     DEFAULT_CSS = """
     HLedgerAssets {

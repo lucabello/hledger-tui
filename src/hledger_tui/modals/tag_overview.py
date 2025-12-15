@@ -16,7 +16,7 @@ class ModalTagOverview(ModalScreen):
         Binding("d", "cycle_depth", "Depth"),
         Binding("shift+down", "change_account(1)", "Next Account"),
         Binding("shift+up", "change_account(-1)", "Previous Account"),
-        Binding(key="enter", action="show_transactions", description="Transactions"),
+        Binding(key="t", action="show_transactions", description="Transactions", priority=True),
         Binding(key="q", action="close_modal", description="Close"),
         Binding(key="escape", action="close_modal", description="Close"),
     ]
