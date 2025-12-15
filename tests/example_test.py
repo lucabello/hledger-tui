@@ -4,8 +4,9 @@ This file shows how the new backend abstraction enables easy testing
 without requiring actual hledger installation or journal files.
 """
 
-from hledger_tui.core import HLedger
-from hledger_tui.core.service import HLedgerBackend
+import pytest
+
+from hledger_tui.core.service import HLedger, HLedgerBackend
 
 
 class MockHLedgerBackend(HLedgerBackend):
@@ -69,7 +70,6 @@ def test_balance_query():
     assert balances[0].name == "expenses:entertainment"
     assert balances[0].balance == "€ 75.00"
     assert balances[0].balance_float == 75.00
-    print("✓ Balance query test passed")
 
 
 def test_register_query():
@@ -84,7 +84,6 @@ def test_register_query():
     assert len(transactions) == 1
     assert transactions[0].description == "Grocery Store"
     assert len(transactions[0].postings) == 2
-    print("✓ Register query test passed")
 
 
 def test_period_navigation():
@@ -100,7 +99,6 @@ def test_period_navigation():
     hledger.period.previous_period()
     assert hledger.period._offset == 0
     assert hledger.period.value == original_value
-    print("✓ Period navigation test passed")
 
 
 def test_depth_cycling():
@@ -119,15 +117,3 @@ def test_depth_cycling():
 
     hledger.cycle_depth()
     assert hledger.depth == 1  # Wraps back to min
-    print("✓ Depth cycling test passed")
-
-
-if __name__ == "__main__":
-    print("Running example tests with mock backend...\n")
-    test_balance_query()
-    test_register_query()
-    test_period_navigation()
-    test_depth_cycling()
-    print("\n✅ All tests passed!")
-    print("\nThis demonstrates how the refactored architecture enables testing")
-    print("without requiring actual hledger installation or journal files.")
