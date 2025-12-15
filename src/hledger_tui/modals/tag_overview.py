@@ -22,7 +22,7 @@ class ModalTagOverview(ModalScreen):
     ModalTagOverview {
         align: center middle;
         Vertical {
-            width: 80%;
+            width: 60%;
             height: 80%;
         }
         Horizontal {

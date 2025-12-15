@@ -42,7 +42,7 @@ class ModalAccountOverview(ModalScreen):
     ModalAccountOverview {
         align: center middle;
         Vertical {
-            width: 80%;
+            width: 60%;
             height: 80%;
         }
         Horizontal {
