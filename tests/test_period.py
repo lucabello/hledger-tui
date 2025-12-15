@@ -1,6 +1,5 @@
 """Tests for HLedgerPeriod functionality."""
 
-import pytest
 from datetime import datetime
 
 from hledger_tui.core.period import HLedgerPeriod

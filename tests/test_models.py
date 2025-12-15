@@ -53,11 +53,7 @@ class TestPosting:
 
     def test_posting_creation(self):
         """Test creating a posting."""
-        posting = Posting(
-            account="expenses:food",
-            amount="€ 50.00",
-            total="€ 50.00"
-        )
+        posting = Posting(account="expenses:food", amount="€ 50.00", total="€ 50.00")
         assert posting.account == "expenses:food"
         assert posting.amount == "€ 50.00"
         assert posting.total == "€ 50.00"
@@ -73,10 +69,7 @@ class TestTransaction:
             Posting("assets:checking", "€ -50.00", "€ -50.00"),
         ]
         transaction = Transaction(
-            txnidx="1",
-            date="2024-01-01",
-            description="Grocery Store",
-            postings=postings
+            txnidx="1", date="2024-01-01", description="Grocery Store", postings=postings
         )
         assert transaction.txnidx == "1"
         assert transaction.date == "2024-01-01"
@@ -85,12 +78,7 @@ class TestTransaction:
 
     def test_transaction_empty_postings(self):
         """Test transaction with no postings."""
-        transaction = Transaction(
-            txnidx="1",
-            date="2024-01-01",
-            description="Test",
-            postings=[]
-        )
+        transaction = Transaction(txnidx="1", date="2024-01-01", description="Test", postings=[])
         assert len(transaction.postings) == 0
 
 
@@ -104,10 +92,7 @@ class TestAccountHistoricalBalance:
             CategoricalBalance("2024-02", "€ 150.00"),
             CategoricalBalance("2024-03", "€ 200.00"),
         ]
-        hist_balance = AccountHistoricalBalance(
-            name="expenses:food",
-            balances=balances
-        )
+        hist_balance = AccountHistoricalBalance(name="expenses:food", balances=balances)
         assert hist_balance.name == "expenses:food"
         assert len(hist_balance.balances) == 3
         assert hist_balance.balances[0].balance_float == 100.00
@@ -115,8 +100,5 @@ class TestAccountHistoricalBalance:
 
     def test_historical_balance_empty(self):
         """Test historical balance with no data."""
-        hist_balance = AccountHistoricalBalance(
-            name="expenses:food",
-            balances=[]
-        )
+        hist_balance = AccountHistoricalBalance(name="expenses:food", balances=[])
         assert len(hist_balance.balances) == 0

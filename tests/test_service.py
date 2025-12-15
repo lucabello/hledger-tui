@@ -1,7 +1,5 @@
 """Tests for HLedger service with mocked backend."""
 
-import pytest
-
 from hledger_tui.core.models import CategoricalBalance, Transaction
 from hledger_tui.core.service import HLedger, HLedgerBackend
 
@@ -127,10 +125,7 @@ class TestHLedgerRegister:
         backend = MockHLedgerBackend()
         hledger = HLedger(backend=backend)
 
-        transactions = hledger.register(
-            account="expenses:food",
-            tag="project:vacation"
-        )
+        transactions = hledger.register(account="expenses:food", tag="project:vacation")
 
         queries, kwargs = backend.register_calls[0]
         assert "expenses:food" in queries
@@ -141,10 +136,7 @@ class TestHLedgerRegister:
         backend = MockHLedgerBackend()
         hledger = HLedger(backend=backend)
 
-        transactions = hledger.register(
-            account="expenses:food",
-            period="2024-01"
-        )
+        transactions = hledger.register(account="expenses:food", period="2024-01")
 
         queries, kwargs = backend.register_calls[0]
         assert kwargs["period"] == "2024-01"
@@ -154,10 +146,7 @@ class TestHLedgerRegister:
         backend = MockHLedgerBackend()
         hledger = HLedger(backend=backend)
 
-        transactions = hledger.register(
-            account="expenses:food",
-            period=""
-        )
+        transactions = hledger.register(account="expenses:food", period="")
 
         queries, kwargs = backend.register_calls[0]
         assert "period" not in kwargs

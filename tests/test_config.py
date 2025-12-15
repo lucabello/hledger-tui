@@ -1,8 +1,5 @@
 """Tests for configuration management."""
 
-import os
-import pytest
-
 from hledger_tui.config import HLedgerConfig
 
 

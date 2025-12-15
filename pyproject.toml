@@ -25,6 +25,7 @@ dev = [
     "pyright",
     "ruff",
     "textual-dev",
+    "pytest",
 ]
 
 [build-system]

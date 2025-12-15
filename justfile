@@ -4,6 +4,10 @@ set shell := ["bash", "-c"]
 default:
   just --list
 
+# Run all quality checks
+[group("dev")]
+check: format lint test
+
 # Lint the codebase using ruff
 [group("dev")]
 lint: && format
@@ -21,6 +25,11 @@ format:
     ruff check --select=I --fix-only
     # Format the code
     ruff format
+
+# Run tests
+[group("dev")]
+test:
+    pytest
 
 # Build the project
 [group("build")]
