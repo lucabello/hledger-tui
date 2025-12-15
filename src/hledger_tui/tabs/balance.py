@@ -24,6 +24,7 @@ class HLedgerBalanceTab(Widget):
         Binding(key="left", action="previous_period", description="Previous Period", show=False),
         Binding(key="right", action="next_period", description="Next Period", show=False),
         Binding("T", "tag_pivot_modal", "Tag Pivot"),
+        Binding(key="r", action="reset_view", description="Reset"),
     ]
     DEFAULT_CSS = """
     HLedgerBalanceTab {
@@ -101,6 +102,8 @@ class HLedgerBalanceTab(Widget):
         if action == "next_period" and self._selected_tag:
             return False
         if action == "cycle_depth" and self._selected_tag:
+            return False
+        if action == "reset_view" and not self._selected_tag:
             return False
         return True
 
@@ -180,3 +183,8 @@ class HLedgerBalanceTab(Widget):
             self.update_tag_data(self._selected_tag)
         else:
             self.update_data()
+
+    def action_reset_view(self) -> None:
+        """Reset the view by clearing the selected tag."""
+        self._selected_tag = None
+        self.update_data()
