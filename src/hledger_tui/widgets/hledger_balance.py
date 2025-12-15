@@ -129,11 +129,12 @@ class HLedgerBalance(Widget):
                     hledger=self._hledger,
                     account=account_query,
                     tag=tag_full,
+                    period="",  # Tag pivot targets the whole journal, not a specific period
                     title=f"Transactions: {tag_full}",
                 )
             )
         else:
-            # Normal account view
+            # Normal account view - use the current period
             await self.app.push_screen(
                 ModalTransactionList(
                     hledger=self._hledger,

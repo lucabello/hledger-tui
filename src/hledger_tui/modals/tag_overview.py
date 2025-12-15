@@ -113,6 +113,7 @@ class ModalTagOverview(ModalScreen):
                 hledger=self.hledger,
                 account=selected_account,
                 tag=tag_filter,
+                period="",  # Tag view targets the whole journal, not a specific period
                 title=f"Transactions: {selected_account} ({tag_filter})",
             )
         )
