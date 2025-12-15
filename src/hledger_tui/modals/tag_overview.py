@@ -98,16 +98,16 @@ class ModalTagOverview(ModalScreen):
         """Show transactions for the selected account with the tag filter."""
         from hledger_tui.modals.transaction_list import ModalTransactionList
         from hledger_tui.widgets._account_datatable import AccountsDataTable
-        
+
         table = self.query_one(AccountsDataTable)
         selected_account = table.selected_account
-        
+
         if not selected_account:
             return
-        
+
         # Build the tag filter string
         tag_filter = f"tag:{self._tag}={self._tag_value[1:]}"
-        
+
         await self.app.push_screen(
             ModalTransactionList(
                 hledger=self.hledger,

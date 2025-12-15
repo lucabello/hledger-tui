@@ -11,7 +11,7 @@ from hledger_tui.hledger import HLedger
 
 class ModalTransactionList(ModalScreen):
     """Modal to display a list of transactions from hledger register."""
-    
+
     BINDINGS = [
         Binding(key="q", action="close_modal", description="Close"),
         Binding(key="escape", action="close_modal", description="Close"),
@@ -53,7 +53,7 @@ class ModalTransactionList(ModalScreen):
         classes: Optional[str] = None,
     ):
         """Initialize the transaction list modal.
-        
+
         Args:
             hledger: HLedger instance to query transactions
             account: Account name to show transactions for
@@ -90,11 +90,9 @@ class ModalTransactionList(ModalScreen):
         """Fetch and display transactions from hledger register."""
         try:
             transactions = self.hledger.register(
-                account=self._account,
-                tag=self._tag,
-                period=self._period
+                account=self._account, tag=self._tag, period=self._period
             )
-            
+
             content_widget = self.query_one("#transaction-content", Static)
             if transactions:
                 content_widget.update(transactions)

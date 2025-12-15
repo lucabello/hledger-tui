@@ -14,7 +14,13 @@ from hledger_tui.widgets._plots import BarPlotScroll
 
 class HLedgerBalance(Widget):
     BINDINGS = [
-        Binding(key="t", action="show_transactions", description="Transactions", show=True, priority=True),
+        Binding(
+            key="t",
+            action="show_transactions",
+            description="Transactions",
+            show=True,
+            priority=True,
+        ),
     ]
     DEFAULT_CSS = """
     HLedgerBalance {
@@ -95,27 +101,29 @@ class HLedgerBalance(Widget):
     async def action_show_transactions(self) -> None:
         """Show transactions for the selected account."""
         from hledger_tui.modals.transaction_list import ModalTransactionList
-        
+
         table = self.query_one(AccountsDataTable)
         selected_account = table.selected_account
-        
+
         if not selected_account:
             return
-        
+
         # Get hledger instance from parent context
         # This will be populated by parent widgets/tabs
-        if not hasattr(self, '_hledger') or not self._hledger:
+        if not hasattr(self, "_hledger") or not self._hledger:
             return
-        
+
         # Check if this is a tag pivot view
         if self._tag_filter:
             # In tag pivot, selected_account is like "=value"
             # We need to use the queries from hledger and add the tag filter
-            tag_value = selected_account[1:] if selected_account.startswith("=") else selected_account
+            tag_value = (
+                selected_account[1:] if selected_account.startswith("=") else selected_account
+            )
             tag_full = f"{self._tag_filter}={tag_value}"
             # Use a general account query from the hledger queries
             account_query = self._hledger.queries[0] if self._hledger.queries else "acct:expenses"
-            
+
             await self.app.push_screen(
                 ModalTransactionList(
                     hledger=self._hledger,

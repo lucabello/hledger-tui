@@ -3,9 +3,9 @@ import re
 from datetime import datetime
 
 from textual.app import ComposeResult
+from textual.containers import Horizontal, VerticalScroll
 from textual.widget import Widget
 from textual.widgets import Static
-from textual.containers import VerticalScroll, Horizontal
 from typing_extensions import override
 
 
@@ -160,11 +160,13 @@ class HLedgerStatistics(Widget):
         unmarked_count = self._count_unmarked_transactions()
         if unmarked_count is not None:
             lines.append(f"  [dim]Unmarked transactions:[/dim] {unmarked_count}")
-        
+
         # Parse unmarked transactions (last 30 days)
         unmarked_count_30d = self._count_unmarked_transactions(days=30)
         if unmarked_count_30d is not None:
-            lines.append(f"  [dim]Unmarked transactions (last 30 days):[/dim] {unmarked_count_30d}")
+            lines.append(
+                f"  [dim]Unmarked transactions (last 30 days):[/dim] {unmarked_count_30d}"
+            )
 
         lines.append("")
 
@@ -187,13 +189,14 @@ class HLedgerStatistics(Widget):
 
     def _count_unmarked_transactions(self, days: int | None = None) -> int | None:
         """Count transactions without a cleared/pending status mark.
-        
+
         Args:
             days: If specified, only count transactions from the last N days.
         """
         try:
-            import sh
             from datetime import datetime, timedelta
+
+            import sh
 
             # Get all transactions with their status
             # Unmarked transactions don't have ! or * status
@@ -203,7 +206,7 @@ class HLedgerStatistics(Widget):
                 end_date = datetime.now()
                 start_date = end_date - timedelta(days=days)
                 args.extend(["--begin", start_date.strftime("%Y-%m-%d")])
-            
+
             output = sh.hledger.print(*args, _tty_out=False)  # pyright: ignore
             lines = output.split("\n")
 

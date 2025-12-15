@@ -144,13 +144,13 @@ class ModalAccountOverview(ModalScreen):
         """Show transactions for the selected period and account."""
         from hledger_tui.modals.transaction_list import ModalTransactionList
         from hledger_tui.widgets._account_datatable import AccountsDataTable
-        
+
         table = self.query_one(AccountsDataTable)
         selected_period = table.selected_account
-        
+
         if not selected_period:
             return
-        
+
         # Use the selected period name directly as the period filter
         await self.app.push_screen(
             ModalTransactionList(

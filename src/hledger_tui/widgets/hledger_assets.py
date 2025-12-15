@@ -14,7 +14,13 @@ from hledger_tui.widgets._plots import PlotPlotScroll
 
 class HLedgerAssets(Widget):
     BINDINGS = [
-        Binding(key="t", action="show_transactions", description="Transactions", show=True, priority=True),
+        Binding(
+            key="t",
+            action="show_transactions",
+            description="Transactions",
+            show=True,
+            priority=True,
+        ),
     ]
     DEFAULT_CSS = """
     HLedgerAssets {
@@ -123,16 +129,16 @@ class HLedgerAssets(Widget):
     async def action_show_transactions(self) -> None:
         """Show transactions for the selected account."""
         from hledger_tui.modals.transaction_list import ModalTransactionList
-        
+
         table = self.query_one(AccountsDataTable)
         selected_account = table.selected_account
-        
+
         if not selected_account:
             return
-        
+
         if not self._hledger:
             return
-        
+
         await self.app.push_screen(
             ModalTransactionList(
                 hledger=self._hledger,
