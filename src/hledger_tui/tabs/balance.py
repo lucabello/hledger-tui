@@ -188,3 +188,4 @@ class HLedgerBalanceTab(Widget):
         """Reset the view by clearing the selected tag."""
         self._selected_tag = None
         self.update_data()
+        self.refresh_bindings()
