@@ -116,10 +116,8 @@ class ModalTransactionList(ModalScreen):
         lines = []
 
         for transaction in transactions:
-            # Add transaction header: date (dim) and description (underlined)
-            lines.append(
-                f"[dim]{transaction.date}[/dim] [underline]{transaction.description}[/underline]"
-            )
+            # Add transaction header: date (dim) and description (bold)
+            lines.append(f"[dim]{transaction.date}[/dim] [bold]{transaction.description}[/bold]")
 
             # Add each posting indented
             for posting in transaction.postings:
