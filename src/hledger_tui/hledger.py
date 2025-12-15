@@ -432,7 +432,7 @@ class HLedger:
             "market": True,  # Unify to one currency for simplicity
         }
         # Use provided period or fallback to self.period
-        period_to_use = period if period is not None else self.period.value
+        period_to_use = period if period else self.period.value
         if period_to_use is not None:
             hledger_args["period"] = period_to_use
 
