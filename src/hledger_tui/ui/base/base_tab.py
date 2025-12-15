@@ -7,7 +7,8 @@ from textual import work
 from textual.widget import Widget
 from typing_extensions import override
 
-from hledger_tui.core import CategoricalBalance, HLedger
+from hledger_tui.core.models import CategoricalBalance
+from hledger_tui.core.service import HLedger
 from hledger_tui.ui.modals.account_overview import ModalAccountOverview
 from hledger_tui.ui.modals.tag_overview import ModalTagOverview
 from hledger_tui.ui.widgets.account_datatable import AccountsDataTable
@@ -15,7 +16,7 @@ from hledger_tui.ui.widgets.account_datatable import AccountsDataTable
 
 class BaseHLedgerTab(Widget):
     """Base class for all HLedger tabs with common functionality.
-    
+
     This class consolidates shared behavior like period navigation, depth cycling,
     and tag management that was previously duplicated across tabs.
     """
@@ -29,7 +30,7 @@ class BaseHLedgerTab(Widget):
         classes: str | None = None,
     ) -> None:
         """Initialize base tab.
-        
+
         Args:
             hledger: HLedger service instance
             name: Widget name
@@ -50,7 +51,7 @@ class BaseHLedgerTab(Widget):
     @override
     def check_action(self, action: str, _: tuple[object, ...]) -> bool | None:
         """Check if action is allowed based on current state.
-        
+
         Prevents period/depth actions when a tag is selected.
         """
         period_actions = {
@@ -94,12 +95,12 @@ class BaseHLedgerTab(Widget):
     async def action_overview_modal(self) -> None:
         """Show account overview modal with historical data."""
         table = self.query_one(AccountsDataTable)
-        
+
         if not self._selected_tag:
             # Regular account overview
             if not table.selected_account:
                 return
-            
+
             period_before_modal = self.hledger.period.value
             await self.app.push_screen_wait(
                 ModalAccountOverview(

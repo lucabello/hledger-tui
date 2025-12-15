@@ -5,12 +5,12 @@ from typing import Optional
 from textual.binding import Binding
 from textual.screen import ModalScreen
 
-from hledger_tui.core import HLedger
+from hledger_tui.core.service import HLedger
 
 
 class BaseModal(ModalScreen):
     """Base class for modal screens with common functionality.
-    
+
     Provides standard close actions and HLedger instance management.
     """
 
@@ -28,7 +28,7 @@ class BaseModal(ModalScreen):
         classes: Optional[str] = None,
     ):
         """Initialize base modal.
-        
+
         Args:
             hledger: HLedger service instance
             name: Screen name

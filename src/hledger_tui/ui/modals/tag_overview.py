@@ -7,7 +7,8 @@ from textual.containers import Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Footer
 
-from hledger_tui.core import CategoricalBalance, HLedger
+from hledger_tui.core.models import CategoricalBalance
+from hledger_tui.core.service import HLedger
 from hledger_tui.ui.widgets.hledger_balance import HLedgerBalance
 
 

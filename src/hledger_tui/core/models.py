@@ -37,7 +37,7 @@ class CategoricalBalance:
 @dataclass
 class AccountHistoricalBalance:
     """Historical balance data for a single account across multiple periods."""
-    
+
     name: str  # Name of the account
     balances: List[CategoricalBalance]  # List of period + balance
 

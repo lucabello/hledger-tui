@@ -1,14 +1,11 @@
-from typing import List, Optional
-
 from textual import work
 from textual.app import ComposeResult
 from textual.binding import Binding
 from typing_extensions import override
 
-from hledger_tui.core import CategoricalBalance, HLedger
+from hledger_tui.core.service import HLedger
+from hledger_tui.ui.base.base_tab import BaseHLedgerTab
 from hledger_tui.ui.modals.tag_pivot import ModalTagPivot
-from hledger_tui.ui.base import BaseHLedgerTab
-from hledger_tui.ui.widgets.account_datatable import AccountsDataTable
 from hledger_tui.ui.widgets.hledger_balance import HLedgerBalance
 
 

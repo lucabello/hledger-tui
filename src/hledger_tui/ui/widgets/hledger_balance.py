@@ -7,9 +7,10 @@ from textual.containers import Horizontal, VerticalScroll
 from textual.widget import Widget
 from typing_extensions import override
 
-from hledger_tui.core import CategoricalBalance, HLedger
+from hledger_tui.core.models import CategoricalBalance
+from hledger_tui.core.service import HLedger
 from hledger_tui.ui.widgets.account_datatable import AccountsDataTable
-from hledger_tui.ui.widgets.plots import BarPlotScroll
+from hledger_tui.ui.widgets.plots.bar_plot import BarPlotScroll
 
 
 class HLedgerBalance(Widget):

@@ -96,7 +96,7 @@ def test_period_navigation():
     original_value = hledger.period.value
     hledger.period.next_period()
     assert hledger.period._offset == 1
-    
+
     hledger.period.previous_period()
     assert hledger.period._offset == 0
     assert hledger.period.value == original_value
@@ -110,13 +110,13 @@ def test_depth_cycling():
 
     # Test depth cycling
     assert hledger.depth == 2  # Default
-    
+
     hledger.cycle_depth()
     assert hledger.depth == 3
-    
+
     hledger.cycle_depth()
     assert hledger.depth == 4  # Max
-    
+
     hledger.cycle_depth()
     assert hledger.depth == 1  # Wraps back to min
     print("✓ Depth cycling test passed")

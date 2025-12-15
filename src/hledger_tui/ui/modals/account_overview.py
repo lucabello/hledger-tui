@@ -6,7 +6,8 @@ from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import ModalScreen
 
-from hledger_tui.core import CategoricalBalance, HLedger
+from hledger_tui.core.models import CategoricalBalance
+from hledger_tui.core.service import HLedger
 from hledger_tui.ui.widgets.grid_footer import GridFooter
 from hledger_tui.ui.widgets.hledger_balance import HLedgerBalance
 

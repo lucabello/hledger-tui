@@ -10,7 +10,7 @@ from typing_extensions import override
 
 class BasePlot(PlotextPlot):
     """Base class for all plot widgets.
-    
+
     Consolidates shared functionality for color management, data updates,
     and theme change handling.
     """
@@ -30,7 +30,7 @@ class BasePlot(PlotextPlot):
         disabled: bool = False,
     ) -> None:
         """Initialize base plot.
-        
+
         Args:
             color: Optional color override for the plot
             name: Widget name
@@ -42,9 +42,7 @@ class BasePlot(PlotextPlot):
         self.categories: List[str] = []
         self.values: List[int | float] = []
         self.color_override = color
-        self.color: Color = self.color_override or Color.parse(
-            self.app.theme_variables["primary"]
-        )
+        self.color: Color = self.color_override or Color.parse(self.app.theme_variables["primary"])
 
     @override
     def on_mount(self) -> None:
@@ -64,7 +62,7 @@ class BasePlot(PlotextPlot):
         values: List[int | float],
     ) -> None:
         """Update plot data.
-        
+
         Args:
             categories: List of category labels
             values: List of numeric values
@@ -76,7 +74,7 @@ class BasePlot(PlotextPlot):
     @abstractmethod
     def recreate(self) -> None:
         """Recreate the plot with current data.
-        
+
         Must be implemented by subclasses for specific plot types.
         """
         pass

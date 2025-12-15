@@ -1,8 +1,5 @@
 """Line plot widget for time series data."""
 
-from typing import List, Optional
-
-from rich.color import Color
 from textual.app import ComposeResult
 from textual.containers import VerticalScroll
 from textual.widget import Widget
@@ -14,7 +11,7 @@ from hledger_tui.ui.widgets.plots.base_plot import BasePlot
 
 class PlotPlotScroll(Widget):
     """Scrollable container for line plots with label."""
-    
+
     DEFAULT_CSS = """
     PlotPlotScroll {
         Label {
@@ -41,7 +38,7 @@ class PlotPlotScroll(Widget):
 
     def update_label(self, content: str) -> None:
         """Update the plot label.
-        
+
         Args:
             content: New label content
         """
@@ -57,7 +54,7 @@ class PlotPlot(BasePlot):
         """Calculate appropriate tick scale based on max value."""
         if not self.values:
             return 10
-        
+
         max_value = max(self.values)
         if max_value < 100:
             return 10
@@ -79,7 +76,7 @@ class PlotPlot(BasePlot):
         self.plt.clear_data()
         if not self.values or not self.categories:
             return
-        
+
         # Use numeric indices instead of date strings to avoid date parsing issues
         x_values = list(range(len(self.categories)))
         self.plt.plot(
@@ -87,12 +84,12 @@ class PlotPlot(BasePlot):
             self.values,
             color=self.color.triplet,
         )
-        
+
         # Dynamically adjust height based on data points for better visibility
         self.styles.height = max(10, min(30, len(self.categories) // 2 + 5))
         self.plt.grid(True, True)
         self.plt.frame(False)
-        
+
         # Set x-axis ticks to show dates at regular intervals
         if len(self.categories) > 10:
             # Show only a subset of dates to avoid clutter
@@ -101,11 +98,8 @@ class PlotPlot(BasePlot):
             tick_labels = [self.categories[int(i)] for i in tick_indices]
             self.plt.xticks(tick_indices, tick_labels)
         else:
-            self.plt.xticks(
-                [float(i) for i in range(len(self.categories))], 
-                self.categories
-            )
-        
+            self.plt.xticks([float(i) for i in range(len(self.categories))], self.categories)
+
         # NOTE: The plot doesn't always update correctly when this function is called;
         # for some reason, calling self.on_mount() makes the plot update correctly.
         self.on_mount()

@@ -6,7 +6,8 @@ from textual.binding import Binding
 from textual.widget import Widget
 from typing_extensions import override
 
-from hledger_tui.core import AccountHistoricalBalance, CategoricalBalance, HLedger
+from hledger_tui.core.models import AccountHistoricalBalance, CategoricalBalance
+from hledger_tui.core.service import HLedger
 from hledger_tui.ui.modals.account_overview import ModalAccountOverview
 from hledger_tui.ui.modals.tag_overview import ModalTagOverview
 from hledger_tui.ui.widgets.account_datatable import AccountsDataTable

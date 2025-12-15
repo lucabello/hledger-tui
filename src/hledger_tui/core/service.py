@@ -21,7 +21,7 @@ from hledger_tui.core.period import HLedgerPeriod
 
 class HLedgerBackend(ABC):
     """Abstract interface for HLedger operations.
-    
+
     This abstraction allows for different implementations (shell, API, mock for testing).
     """
 
@@ -88,7 +88,7 @@ class ShellHLedgerBackend(HLedgerBackend):
 
 class HLedger:
     """High-level service for interacting with HLedger to extract data from a Ledger file.
-    
+
     This class provides a clean interface for querying HLedger data and parsing results.
     """
 
@@ -111,10 +111,10 @@ class HLedger:
         backend: Optional[HLedgerBackend] = None,
     ):
         """Initialize HLedger service.
-        
+
         Args:
             queries: List of HLedger query strings. Defaults to DEFAULT_HLEDGER_QUERIES.
-            backend: Backend implementation for executing HLedger commands. 
+            backend: Backend implementation for executing HLedger commands.
                     Defaults to ShellHLedgerBackend.
         """
         self.queries = queries if queries is not None else self.DEFAULT_HLEDGER_QUERIES
@@ -126,11 +126,11 @@ class HLedger:
         self, queries: Optional[List[str]] = None, **kwargs
     ) -> List[AccountHistoricalBalance]:
         """Get historical balance data for assets/liabilities accounts.
-        
+
         Args:
             queries: Optional list of query filters. Uses self.queries if not provided.
             **kwargs: Additional arguments passed to the backend.
-            
+
         Returns:
             List of AccountHistoricalBalance objects with time-series data.
         """
@@ -185,7 +185,7 @@ class HLedger:
         Args:
             queries: Optional list of query filters. Uses self.queries if not provided.
             **kwargs: Additional arguments passed to the backend.
-            
+
         Returns:
             List of CategoricalBalance objects with current balance data.
         """
@@ -216,7 +216,7 @@ class HLedger:
         Args:
             tag: Tag filter string (e.g., "tag:project=myproject")
             **kwargs: Additional arguments passed to the backend.
-            
+
         Returns:
             List of CategoricalBalance objects for the tag filter.
         """
