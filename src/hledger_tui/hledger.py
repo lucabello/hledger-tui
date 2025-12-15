@@ -458,8 +458,10 @@ class HLedger:
             period_to_use = period
         else:
             period_to_use = self.period.value
-            
+
         if period_to_use:  # Only add if not empty string
+            # Convert ISO week format (YYYY-WNN) to date range if needed
+            period_to_use = self._convert_week_period(period_to_use)
             hledger_args["period"] = period_to_use
 
         # Build query list
@@ -472,33 +474,63 @@ class HLedger:
             **hledger_args,
             **kwargs,
         )
-        
+
         # Parse CSV output into structured data
         return self._parse_register_csv(raw_register)
 
     @staticmethod
+    def _convert_week_period(period: str) -> str:
+        """Convert ISO week format (YYYY-WNN) to date range format.
+
+        Args:
+            period: Period string, possibly in ISO week format (e.g., "2024-W04")
+
+        Returns:
+            Converted period string, or original if not in week format
+        """
+        import re
+
+        # Check if period matches ISO week format (YYYY-WNN)
+        week_match = re.match(r"^(\d{4})-W(\d{2})$", period)
+        if not week_match:
+            return period
+
+        year = int(week_match.group(1))
+        week = int(week_match.group(2))
+
+        # Parse the Monday of that ISO week
+        # %G is ISO year, %V is ISO week number, %u is day of week (1=Monday)
+        monday = datetime.strptime(f"{year}-W{week:02d}-1", "%G-W%V-%u")
+
+        # Calculate Sunday (last day of the week)
+        sunday = monday + timedelta(days=6)
+
+        # Return as date range
+        return f"{monday.strftime('%Y-%m-%d')}..{sunday.strftime('%Y-%m-%d')}"
+
+    @staticmethod
     def _parse_register_csv(csv_data: str) -> List[Transaction]:
         """Parse CSV output from hledger register into Transaction objects.
-        
+
         Args:
             csv_data: Raw CSV string from hledger register
-            
+
         Returns:
             List of Transaction objects, grouped by txnidx
         """
         csv_reader = csv.DictReader(StringIO(csv_data))
         transactions_dict: dict[str, Transaction] = {}
-        
+
         for row in csv_reader:
             txnidx = row["txnidx"]
-            
+
             # Create posting for this row
             posting = Posting(
                 account=row["account"],
                 amount=row["amount"],
                 total=row["total"],
             )
-            
+
             # If transaction doesn't exist yet, create it
             if txnidx not in transactions_dict:
                 transactions_dict[txnidx] = Transaction(
@@ -507,10 +539,10 @@ class HLedger:
                     description=row["description"],
                     postings=[],
                 )
-            
+
             # Add posting to transaction
             transactions_dict[txnidx].postings.append(posting)
-        
+
         # Return transactions in order
         return list(transactions_dict.values())
 
