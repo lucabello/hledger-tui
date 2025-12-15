@@ -105,24 +105,24 @@ class ModalTransactionList(ModalScreen):
 
     @staticmethod
     def _format_transactions(transactions: List[Transaction]) -> str:
-        """Format transactions into a readable text format.
+        """Format transactions into a readable text format with Rich markup.
         
         Args:
             transactions: List of Transaction objects to format
             
         Returns:
-            Formatted string with transactions separated by blank lines
+            Formatted string with transactions separated by blank lines, using Rich markup for styling
         """
         lines = []
         
         for transaction in transactions:
-            # Add transaction header: date and description
-            lines.append(f"{transaction.date} {transaction.description}")
+            # Add transaction header: date (dim) and description (underlined)
+            lines.append(f"[dim]{transaction.date}[/dim] [underline]{transaction.description}[/underline]")
             
             # Add each posting indented
             for posting in transaction.postings:
-                # Align account and amount nicely
-                lines.append(f"    {posting.account:<50} {posting.amount:>15} {posting.total:>15}")
+                # Align account and amount nicely, with total dimmed
+                lines.append(f"    {posting.account:<50} {posting.amount:>15} [dim]{posting.total:>15}[/dim]")
             
             # Add blank line between transactions
             lines.append("")
