@@ -115,11 +115,11 @@ class HLedgerBalance(Widget):
 
         # Check if this is a tag pivot view
         if self._tag_filter:
-            # In tag pivot, selected_account is like "=value"
+            # In tag pivot, selected_account is like "=value" or ":value"
             # We need to use the queries from hledger and add the tag filter
-            tag_value = (
-                selected_account[1:] if selected_account.startswith("=") else selected_account
-            )
+            tag_value = selected_account
+            if selected_account.startswith("=") or selected_account.startswith(":"):
+                tag_value = selected_account[1:]
             tag_full = f"{self._tag_filter}={tag_value}"
             # Use a general account query from the hledger queries
             account_query = self._hledger.queries[0] if self._hledger.queries else "acct:expenses"
