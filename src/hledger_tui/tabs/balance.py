@@ -142,6 +142,11 @@ class HLedgerBalanceTab(Widget):
             if self.hledger.period.value != period_before_modal:
                 self.update_data()
         else:
+            # Save current depth and set to minimum 3 for TagOverview
+            depth_before_modal = self.hledger.depth
+            if self.hledger.depth < 3:
+                self.hledger.depth = 3
+
             await self.app.push_screen_wait(
                 ModalTagOverview(
                     tag=self._selected_tag,
@@ -150,6 +155,12 @@ class HLedgerBalanceTab(Widget):
                     hledger=self.hledger,
                 )
             )
+
+            # Restore original depth
+            self.hledger.depth = depth_before_modal
+            # Update data if depth changed during modal interaction
+            if self.hledger.depth != depth_before_modal:
+                self.update_data()
 
     @work
     async def action_tag_pivot_modal(self):
