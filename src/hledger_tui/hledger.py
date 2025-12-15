@@ -420,7 +420,8 @@ class HLedger:
         Args:
             account: The account to show transactions for
             tag: Optional tag filter in the format "tag:key=value"
-            period: Optional specific period to use instead of self.period
+            period: Optional specific period to use instead of self.period.
+                   Pass empty string "" to explicitly skip period filter.
             **kwargs: Additional arguments to pass to hledger register
 
         Returns:
@@ -432,8 +433,13 @@ class HLedger:
             "market": True,  # Unify to one currency for simplicity
         }
         # Use provided period or fallback to self.period
-        period_to_use = period if period else self.period.value
-        if period_to_use is not None:
+        # period="" means explicitly no period filter
+        if period is not None:
+            period_to_use = period
+        else:
+            period_to_use = self.period.value
+            
+        if period_to_use:  # Only add if not empty string
             hledger_args["period"] = period_to_use
 
         # Build query list
