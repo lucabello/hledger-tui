@@ -96,9 +96,9 @@ class HLedger:
     DEFAULT_DEPTH: Final[int] = config.default_depth
     DEFAULT_DEPTH_MAX: Final[int] = config.default_depth_max
     DEFAULT_PERIOD: Final[HLedgerPeriod] = HLedgerPeriod()
-    DEFAULT_HLEDGER_QUERIES: ClassVar[List[str]] = config.default_queries
-    DEFAULT_HLEDGER_TAG_QUERIES: ClassVar[List[str]] = config.tag_queries
-    DEFAULT_HLEDGER_ASSETS_QUERIES: ClassVar[List[str]] = config.assets_queries
+    DEFAULT_HLEDGER_QUERIES: ClassVar[List[str]] = config.default_expenses_queries
+    DEFAULT_HLEDGER_TAG_QUERIES: ClassVar[List[str]] = config.default_tag_queries
+    DEFAULT_HLEDGER_ASSETS_QUERIES: ClassVar[List[str]] = config.default_assets_queries
 
     queries: List[str]  # Series of HLedger queries
     depth: int  # The --depth to use in HLedger commands

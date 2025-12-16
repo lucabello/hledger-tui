@@ -15,6 +15,8 @@ lint: && format
     ruff check
     # Run static checks
     pyright src
+    # Check for dead code
+    vulture src --min-confidence=80 --ignore-names="parameters"
 
 # Format the codebase using ruff
 [group("dev")]

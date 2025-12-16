@@ -14,11 +14,6 @@ class HLedgerViewApp(App):
     TITLE = "HLedger View"
     SUB_TITLE = "Observe your finances"
 
-    # BINDINGS = [
-    #     Binding(key="1", action="switch_tab('balanceTab')", show=False),
-    #     Binding(key="2", action="switch_tab('balanceSheetTab')", show=False),
-    # ]
-
     def on_mount(self) -> None:
         self.theme = "dracula"
 
@@ -28,8 +23,6 @@ class HLedgerViewApp(App):
                 yield HLedgerBalanceTab()
             with TabPane("Assets", id="balanceByTag"):
                 yield HLedgerAssetsTab()
-                # yield Label()
-                # yield HLedgerBalanceTab()
             with TabPane("Statistics", id="statistics"):
                 yield HLedgerStatisticsTab()
         yield Footer()

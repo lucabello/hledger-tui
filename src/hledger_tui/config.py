@@ -6,14 +6,10 @@ from typing import Final, List, Optional
 
 @dataclass
 class HLedgerConfig:
-    """Central configuration for HLedger TUI.
-
-    This class consolidates all configuration values that were previously
-    scattered across different modules as class constants.
-    """
+    """Central configuration for HLedger TUI."""
 
     # Query defaults
-    default_queries: List[str] = field(
+    default_expenses_queries: List[str] = field(
         default_factory=lambda: [
             "acct:expenses",
             "not:acct:financial",
@@ -22,13 +18,13 @@ class HLedgerConfig:
         ]
     )
 
-    tag_queries: List[str] = field(
+    default_tag_queries: List[str] = field(
         default_factory=lambda: [
             "acct:expenses",
         ]
     )
 
-    assets_queries: List[str] = field(
+    default_assets_queries: List[str] = field(
         default_factory=lambda: [
             "acct:assets",
             "acct:liabilities",
@@ -59,7 +55,9 @@ class HLedgerConfig:
 
         # Override with environment variables if present
         if queries_env := os.getenv("HLEDGER_TUI_QUERIES"):
-            config.default_queries = [q.strip() for q in queries_env.split(",")]
+            config.default_expenses_queries = [q.strip() for q in queries_env.split(",")]
+
+        # TODO: Make this HLEDGER_TUI_EXPENSE_QUERIES and also add HLEDGER_TUI_ASSETS_QUERIES and HLEDGER_TUI_TAG_QUERIES in order to override the other sets of default queries.
 
         if depth_env := os.getenv("HLEDGER_TUI_DEPTH"):
             try:

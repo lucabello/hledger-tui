@@ -12,7 +12,7 @@ class TestHLedgerConfigFromEnv:
 
         config = HLedgerConfig.from_env()
 
-        assert config.default_queries == ["acct:custom", "not:acct:skip"]
+        assert config.default_expenses_queries == ["acct:custom", "not:acct:skip"]
 
     def test_config_from_env_with_custom_depth(self, monkeypatch):
         """Test that from_env() loads custom depth from environment variables."""
@@ -49,7 +49,7 @@ class TestHLedgerConfigFromEnv:
         config = HLedgerConfig.from_env()
 
         # Should use defaults
-        assert "acct:expenses" in config.default_queries
+        assert "acct:expenses" in config.default_expenses_queries
         assert config.default_depth == 2
         assert config.default_commodity == "€"
 
@@ -60,14 +60,14 @@ class TestHLedgerConfigFromEnv:
         config = HLedgerConfig.from_env()
 
         # All queries should be stripped
-        assert config.default_queries == ["acct:expenses", "not:acct:test", "acct:other"]
+        assert config.default_expenses_queries == ["acct:expenses", "not:acct:test", "acct:other"]
 
     def test_config_queries_are_mutable_list(self):
         """Test that queries lists are mutable."""
         config = HLedgerConfig()
-        original_length = len(config.default_queries)
-        config.default_queries.append("acct:new")
-        assert len(config.default_queries) == original_length + 1
+        original_length = len(config.default_expenses_queries)
+        config.default_expenses_queries.append("acct:new")
+        assert len(config.default_expenses_queries) == original_length + 1
 
     def test_config_default_factory(self):
         """Test that field defaults use factory functions."""
@@ -75,5 +75,5 @@ class TestHLedgerConfigFromEnv:
         config2 = HLedgerConfig()
 
         # Lists should be separate instances
-        config1.default_queries.append("test")
-        assert len(config1.default_queries) != len(config2.default_queries)
+        config1.default_expenses_queries.append("test")
+        assert len(config1.default_expenses_queries) != len(config2.default_expenses_queries)

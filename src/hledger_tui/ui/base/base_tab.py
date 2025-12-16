@@ -18,7 +18,7 @@ class BaseHLedgerTab(Widget):
     """Base class for all HLedger tabs with common functionality.
 
     This class consolidates shared behavior like period navigation, depth cycling,
-    and tag management that was previously duplicated across tabs.
+    and tag management.
     """
 
     def __init__(
