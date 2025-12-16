@@ -8,10 +8,7 @@ from hledger_tui.config import config
 
 @dataclass
 class CategoricalBalance:
-    """A data point containing a name (e.g., account, time period, etc.) and a numerical balance.
-
-    Note: the balance must include the currency.
-    """
+    """Balance data point with a category name and amount including currency."""
 
     DEFAULT_COMMODITY: ClassVar[str] = config.default_commodity
 
@@ -26,7 +23,7 @@ class CategoricalBalance:
 
     @property
     def commodity(self) -> str:
-        """Return the commodity from the given balance."""
+        """Extract currency/commodity symbol from balance string."""
         return self.balance.split()[0]
 
     @property

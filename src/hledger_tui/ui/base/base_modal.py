@@ -9,10 +9,7 @@ from hledger_tui.core.service import HLedger
 
 
 class BaseModal(ModalScreen):
-    """Base class for modal screens with common functionality.
-
-    Provides standard close actions and HLedger instance management.
-    """
+    """Base modal screen with standard close bindings and HLedger instance."""
 
     BINDINGS = [
         Binding(key="q", action="close_modal", description="Close"),
@@ -39,5 +36,5 @@ class BaseModal(ModalScreen):
         self.hledger = hledger
 
     def action_close_modal(self) -> None:
-        """Close the modal."""
+        """Dismiss the modal screen."""
         self.dismiss()

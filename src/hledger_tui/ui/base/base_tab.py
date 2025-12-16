@@ -15,11 +15,7 @@ from hledger_tui.ui.widgets.account_datatable import AccountsDataTable
 
 
 class BaseHLedgerTab(Widget):
-    """Base class for all HLedger tabs with common functionality.
-
-    This class consolidates shared behavior like period navigation, depth cycling,
-    and tag management.
-    """
+    """Base widget for HLedger tabs with period navigation and depth cycling."""
 
     def __init__(
         self,
@@ -50,10 +46,7 @@ class BaseHLedgerTab(Widget):
 
     @override
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
-        """Check if action is allowed based on current state.
-
-        Prevents period/depth actions when a tag is selected.
-        """
+        """Validate action availability (disables period/depth actions when tag is selected)."""
         period_actions = {
             "set_period_unit",
             "previous_period",
@@ -67,22 +60,22 @@ class BaseHLedgerTab(Widget):
         return True
 
     def action_cycle_depth(self) -> None:
-        """Cycle through account depths and refresh."""
+        """Cycle account depth and refresh data."""
         self.hledger.cycle_depth()
         self.update_data()
 
     def action_previous_period(self) -> None:
-        """Move to previous period and refresh."""
+        """Navigate to previous period and refresh."""
         self.hledger.period.previous_period()
         self.update_data()
 
     def action_next_period(self) -> None:
-        """Move to next period and refresh."""
+        """Navigate to next period and refresh."""
         self.hledger.period.next_period()
         self.update_data()
 
     def action_set_period_unit(self, period_unit: str) -> None:
-        """Set period unit and refresh."""
+        """Set period unit and refresh data."""
         self.hledger.period.unit = period_unit  # pyright: ignore
         self.update_data()
 
@@ -93,7 +86,7 @@ class BaseHLedgerTab(Widget):
 
     @work
     async def action_overview_modal(self) -> None:
-        """Show account overview modal with historical data."""
+        """Display account or tag overview modal with historical balance data."""
         table = self.query_one(AccountsDataTable)
 
         if not self._selected_tag:

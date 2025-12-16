@@ -28,7 +28,7 @@ class HLedgerViewApp(App):
         yield Footer()
 
     def action_switch_tab(self, tab_id: str):
-        """Switch to the tab with the specified id."""
+        """Switch to tab by ID."""
         tabbed_content = self.query_one(TabbedContent)
         tabbed_content.active = tab_id
 

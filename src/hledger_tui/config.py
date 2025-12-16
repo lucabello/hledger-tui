@@ -6,7 +6,7 @@ from typing import Final, List, Optional
 
 @dataclass
 class HLedgerConfig:
-    """Central configuration for HLedger TUI."""
+    """Configuration settings for HLedger TUI with default queries and display options."""
 
     # Query defaults
     default_expenses_queries: List[str] = field(
@@ -44,7 +44,14 @@ class HLedgerConfig:
 
     @classmethod
     def from_env(cls) -> "HLedgerConfig":
-        """Load configuration from environment variables.
+        """Create configuration from environment variables, falling back to defaults.
+
+        Environment variables:
+            HLEDGER_TUI_EXPENSE_QUERIES: Comma-separated expense queries
+            HLEDGER_TUI_TAG_QUERIES: Comma-separated tag queries
+            HLEDGER_TUI_ASSETS_QUERIES: Comma-separated asset queries
+            HLEDGER_TUI_DEPTH: Default depth (integer)
+            HLEDGER_TUI_COMMODITY: Default commodity symbol
 
         Returns:
             HLedgerConfig instance with values from environment or defaults.
@@ -54,10 +61,14 @@ class HLedgerConfig:
         config = cls()
 
         # Override with environment variables if present
-        if queries_env := os.getenv("HLEDGER_TUI_QUERIES"):
-            config.default_expenses_queries = [q.strip() for q in queries_env.split(",")]
+        if expenses_queries_env := os.getenv("HLEDGER_TUI_EXPENSE_QUERIES"):
+            config.default_expenses_queries = [q.strip() for q in expenses_queries_env.split(",")]
 
-        # TODO: Make this HLEDGER_TUI_EXPENSE_QUERIES and also add HLEDGER_TUI_ASSETS_QUERIES and HLEDGER_TUI_TAG_QUERIES in order to override the other sets of default queries.
+        if tag_queries_env := os.getenv("HLEDGER_TUI_TAG_QUERIES"):
+            config.default_tag_queries = [q.strip() for q in tag_queries_env.split(",")]
+
+        if assets_queries_env := os.getenv("HLEDGER_TUI_ASSETS_QUERIES"):
+            config.default_assets_queries = [q.strip() for q in assets_queries_env.split(",")]
 
         if depth_env := os.getenv("HLEDGER_TUI_DEPTH"):
             try:

@@ -5,11 +5,11 @@ from typing import Literal
 
 
 class HLedgerPeriod:
-    """An HLedger period based on a fixed unit (e.g., '1 month ago').
+    """Represents a time period for HLedger queries with relative offset.
 
     Args:
-        unit: The time unit used in the period, or None for all time
-        offset: How many time units in the past (negative ints) or in the future (positive ints)
+        unit: Time unit ('weeks', 'months', 'quarters', 'years') or None for all time
+        offset: Period offset (negative for past, positive for future, 0 for current)
     """
 
     unit: str | None
@@ -36,7 +36,7 @@ class HLedgerPeriod:
 
     @property
     def singular_unit(self) -> str:
-        """The current unit used by the HLedgerPeriod, but in singular form."""
+        """Unit in singular form (e.g., 'month' instead of 'months')."""
         if self.unit is None:
             return "all time"
         return self.unit[:-1]
@@ -54,7 +54,7 @@ class HLedgerPeriod:
         return f"{abs(self._offset)} {pretty_unit} {direction}"
 
     def _get_period_date(self) -> str:
-        """Calculate the actual date/period this HLedgerPeriod refers to."""
+        """Calculate the actual date or period string (e.g., '2025/03' or '2025/Q1')."""
         if self.unit is None:
             return "All Time"
 
@@ -107,7 +107,7 @@ class HLedgerPeriod:
 
     @property
     def pretty_value(self) -> str:
-        """Human-readable period string with actual date/period information."""
+        """Human-readable period string with date (e.g., '1 month ago (2024/11)')."""
         if self.unit is None:
             return "All Time"
 
@@ -119,9 +119,9 @@ class HLedgerPeriod:
         return base_value
 
     def previous_period(self):
-        """Decrease the period offset by one."""
+        """Move to the previous period (offset -= 1)."""
         self._offset -= 1
 
     def next_period(self):
-        """Increase the period offset by one."""
+        """Move to the next period (offset += 1)."""
         self._offset += 1

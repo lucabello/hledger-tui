@@ -20,49 +20,49 @@ from hledger_tui.core.period import HLedgerPeriod
 
 
 class HLedgerBackend(ABC):
-    """Abstract interface for HLedger operations.
+    """Abstract interface for HLedger command execution.
 
-    This abstraction allows for different implementations (shell, API, mock for testing).
+    Enables multiple implementations: shell commands, API calls, or mocks for testing.
     """
 
     @abstractmethod
     def balance(self, queries: List[str], **kwargs) -> str:
-        """Execute hledger balance command and return raw output."""
+        """Execute 'hledger balance' and return raw output."""
         pass
 
     @abstractmethod
     def register(self, queries: List[str], **kwargs) -> str:
-        """Execute hledger register command and return raw output."""
+        """Execute 'hledger register' and return raw output."""
         pass
 
     @abstractmethod
     def stats(self) -> str:
-        """Execute hledger stats command and return raw output."""
+        """Execute 'hledger stats' and return raw output."""
         pass
 
     @abstractmethod
     def files(self) -> str:
-        """Execute hledger files command and return raw output."""
+        """Execute 'hledger files' and return raw output."""
         pass
 
     @abstractmethod
     def accounts(self, queries: List[str]) -> str:
-        """Execute hledger accounts command and return raw output."""
+        """Execute 'hledger accounts' and return raw output."""
         pass
 
     @abstractmethod
     def tags(self, **kwargs) -> str:
-        """Execute hledger tags command and return raw output."""
+        """Execute 'hledger tags' and return raw output."""
         pass
 
     @abstractmethod
     def commodities(self) -> str:
-        """Execute hledger commodities command and return raw output."""
+        """Execute 'hledger commodities' and return raw output."""
         pass
 
 
 class ShellHLedgerBackend(HLedgerBackend):
-    """Implementation using sh library to call hledger shell commands."""
+    """HLedger backend implementation using shell command execution via sh library."""
 
     def balance(self, queries: List[str], **kwargs) -> str:
         return sh.hledger.balance(queries, **kwargs)  # pyright: ignore
@@ -87,9 +87,10 @@ class ShellHLedgerBackend(HLedgerBackend):
 
 
 class HLedger:
-    """High-level service for interacting with HLedger to extract data from a Ledger file.
+    """High-level service for querying and parsing HLedger data.
 
-    This class provides a clean interface for querying HLedger data and parsing results.
+    Provides methods to extract balances, transactions, accounts, and statistics
+    with support for periods, depth filtering, and multiple query types.
     """
 
     DEFAULT_DEPTH_MIN: Final[int] = config.default_depth_min
@@ -295,7 +296,7 @@ class HLedger:
         return balance_over_time
 
     def _account_depth(self) -> int:
-        """Return the maximum account depth for the configured query."""
+        """Calculate maximum account depth from current query results."""
         accounts = self.backend.accounts(self.queries).split("\n")
         max_depth = max(len(account.split(":")) for account in accounts) + 1
         print(max_depth)
@@ -303,7 +304,7 @@ class HLedger:
 
     @staticmethod
     def accounts_depth(accounts: List[str]) -> int:
-        """Return the maximum account depth using the given accounts as query."""
+        """Calculate maximum account depth for specified account queries."""
         backend = ShellHLedgerBackend()
         raw_accounts = backend.accounts(accounts).split("\n")
         max_depth = max(len(acc.split(":")) for acc in raw_accounts) + 1
@@ -311,7 +312,7 @@ class HLedger:
 
     @staticmethod
     def tags() -> List[str]:
-        """Return the existing HLedger tags."""
+        """Get all declared tags from HLedger journal."""
         backend = ShellHLedgerBackend()
         raw_tags: List[str] = backend.tags(declared=True).split("\n")
         tags = [t for t in raw_tags if t]
@@ -319,27 +320,27 @@ class HLedger:
 
     @staticmethod
     def stats() -> str:
-        """Return the output from 'hledger stats'."""
+        """Get statistics output from 'hledger stats' command."""
         backend = ShellHLedgerBackend()
         return backend.stats()
 
     @staticmethod
     def files() -> List[str]:
-        """Return the list of journal files."""
+        """Get list of journal files used by HLedger."""
         backend = ShellHLedgerBackend()
         raw_files: str = backend.files()
         return [f for f in raw_files.split("\n") if f]
 
     @staticmethod
     def all_accounts() -> List[str]:
-        """Return all accounts in the journal."""
+        """Get all account names from HLedger journal."""
         backend = ShellHLedgerBackend()
         raw_accounts: str = backend.accounts([]).strip()
         return [a for a in raw_accounts.split("\n") if a]
 
     @staticmethod
     def commodities() -> List[str]:
-        """Return the list of commodities/currencies used."""
+        """Get list of commodities/currencies used in journal."""
         backend = ShellHLedgerBackend()
         raw_commodities: str = backend.commodities()
         return [c for c in raw_commodities.split("\n") if c]
@@ -454,7 +455,7 @@ class HLedger:
         return list(transactions_dict.values())
 
     def cycle_depth(self) -> None:
-        """Cyclically increase the query depth, wrapping back to 1 after reaching the max."""
+        """Increment depth cyclically, wrapping to minimum after reaching maximum."""
         if self.depth + 1 > self.DEFAULT_DEPTH_MAX:
             self.depth = self.DEFAULT_DEPTH_MIN
             return
