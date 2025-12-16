@@ -59,7 +59,7 @@ class HLedgerBalanceTab(BaseHLedgerTab):
         hledger_balance._tag_filter = None
         hledger_balance.update_data(
             balances=self._balances,
-            table_title=self.hledger.period.pretty_value,
+            table_title=f"< {self.hledger.period.pretty_value} >",
             table_subtitle=f"Depth: {self.hledger.depth}",
         )
 
