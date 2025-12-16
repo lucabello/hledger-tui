@@ -78,7 +78,7 @@ class HLedgerAssetsTab(Widget):
         hledger_assets = self.query_one(HLedgerAssets)
         hledger_assets.update_data(
             balances=self._account_balances,
-            table_title=f"< {self.hledger.period.pretty_value} >",
+            table_title=f"←  {self.hledger.period.pretty_value}  →",
             table_subtitle=f"Depth: {self.hledger.depth}",
         )
         # Update plot for the currently selected account (if any)

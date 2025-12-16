@@ -99,7 +99,7 @@ class ModalAccountOverview(ModalScreen):
         hledger_balance = self.query_one(HLedgerBalance)
         hledger_balance.update_data(
             balances=balance_over_time,
-            table_title=f"< {self.hledger.period.subdivision} balance >".title(),
+            table_title=f"←  {self.hledger.period.subdivision} balance  →".title(),
             table_subtitle="",
             plot_label=f"{self._selected_account} ({period_display})",
         )
