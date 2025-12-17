@@ -67,6 +67,20 @@ uvx hledger-tui
    hledger tui
    ```
 
+3. **Web App Mode** (optional):
+   
+   You can also run hledger-tui as a web application accessible via browser:
+   ```bash
+   hledger-tui --serve
+   ```
+   
+   This will start a web server and provide a URL to access the TUI in your browser.
+
+### Command-Line Options
+
+- `--help`: Show help message with all available options and examples
+- `--serve`: Run the app in web app mode, accessible via browser
+
 That's it! Use the keyboard shortcuts shown in the footer to navigate and explore your financial data.
 
 ## ⚙️ Configuration

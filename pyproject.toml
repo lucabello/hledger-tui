@@ -12,6 +12,7 @@ dependencies = [
   "textual",
   "textual-plotext",
   "sh",
+  "typer",
 ]
 
 [project.urls]
@@ -20,7 +21,7 @@ Repository = "https://github.com/lucabello/hledger-tui"
 Issues = "https://github.com/lucabello/hledger-tui/issues"
 
 [project.scripts]
-hledger-tui = "hledger_tui.app:main"
+hledger-tui = "hledger_tui.app:cli"
 
 [dependency-groups]
 dev = [

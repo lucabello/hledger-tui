@@ -1,3 +1,4 @@
+import typer
 from textual.app import App, ComposeResult
 from textual.widgets import (
     Footer,
@@ -35,11 +36,45 @@ class HLedgerTUIApp(App):
         tabbed_content.active = tab_id
 
 
-def main():
-    """Entry point for the hledger-tui application."""
+cli = typer.Typer(
+    name="hledger-tui",
+    help="A beautiful, keyboard-driven terminal UI for viewing and analyzing your hledger financial data.",
+    add_completion=False,
+    no_args_is_help=False,
+    rich_markup_mode="rich",
+    epilog="""
+[bold]Examples:[/bold]
+  hledger-tui              Run in terminal mode
+  hledger-tui --serve      Run in web app mode (accessible via browser)
+
+[bold]Environment Variables:[/bold]
+  LEDGER_FILE              Path to your hledger journal file (required)
+  HLEDGER_TUI_DEPTH        Default depth for account hierarchy display
+  HLEDGER_TUI_COMMODITY    Default commodity symbol for display
+
+For more information, visit: https://github.com/lucabello/hledger-tui
+    """,
+)
+
+
+@cli.command()
+def main(
+    serve: bool = typer.Option(
+        False,
+        "--serve",
+        help="Run the app in web app mode, accessible via browser",
+    ),
+):
+    """Launch the hledger-tui application."""
     app = HLedgerTUIApp()
-    app.run()
+
+    if serve:
+        # Run in web app mode
+        app.run(headless=True)
+    else:
+        # Run in terminal mode
+        app.run()
 
 
 if __name__ == "__main__":
-    main()
+    cli()
