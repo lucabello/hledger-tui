@@ -36,28 +36,6 @@ class HLedgerTUIApp(App):
         tabbed_content.active = tab_id
 
 
-cli = typer.Typer(
-    name="hledger-tui",
-    help="A beautiful, keyboard-driven terminal UI for viewing and analyzing your hledger financial data.",
-    add_completion=False,
-    no_args_is_help=False,
-    rich_markup_mode="rich",
-    epilog="""
-[bold]Examples:[/bold]
-  hledger-tui              Run in terminal mode
-  hledger-tui --serve      Run in web app mode (accessible via browser)
-
-[bold]Environment Variables:[/bold]
-  LEDGER_FILE              Path to your hledger journal file (required)
-  HLEDGER_TUI_DEPTH        Default depth for account hierarchy display
-  HLEDGER_TUI_COMMODITY    Default commodity symbol for display
-
-For more information, visit: https://github.com/lucabello/hledger-tui
-    """,
-)
-
-
-@cli.command()
 def main(
     serve: bool = typer.Option(
         False,
@@ -65,7 +43,22 @@ def main(
         help="Run the app in web app mode, accessible via browser",
     ),
 ):
-    """Launch the hledger-tui application."""
+    """
+    A beautiful, keyboard-driven terminal UI for viewing and analyzing your hledger financial data.
+
+    \b
+    Examples:
+      hledger-tui              Run in terminal mode
+      hledger-tui --serve      Run in web app mode (accessible via browser)
+
+    \b
+    Environment Variables:
+      LEDGER_FILE              Path to your hledger journal file (required)
+      HLEDGER_TUI_DEPTH        Default depth for account hierarchy display
+      HLEDGER_TUI_COMMODITY    Default commodity symbol for display
+
+    For more information, visit: https://github.com/lucabello/hledger-tui
+    """
     app = HLedgerTUIApp()
 
     if serve:
@@ -74,6 +67,11 @@ def main(
     else:
         # Run in terminal mode
         app.run()
+
+
+def cli():
+    """Entry point for the CLI."""
+    typer.run(main)
 
 
 if __name__ == "__main__":
