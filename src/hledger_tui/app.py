@@ -1,3 +1,6 @@
+import subprocess
+import sys
+
 import typer
 from textual.app import App, ComposeResult
 from textual.widgets import (
@@ -59,13 +62,25 @@ def main(
 
     For more information, visit: https://github.com/lucabello/hledger-tui
     """
-    app = HLedgerTUIApp()
-
     if serve:
-        # Run in web app mode
-        app.run(headless=True)
+        # Run in web app mode using textual serve
+        try:
+            subprocess.run(
+                ["textual", "serve", "hledger_tui.app:HLedgerTUIApp"],
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            typer.echo(f"Error running textual serve: {e}", err=True)
+            raise typer.Exit(1)
+        except FileNotFoundError:
+            typer.echo(
+                "Error: 'textual' command not found. Make sure textual-dev is installed.",
+                err=True,
+            )
+            raise typer.Exit(1)
     else:
         # Run in terminal mode
+        app = HLedgerTUIApp()
         app.run()
 
 
