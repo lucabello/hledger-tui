@@ -35,6 +35,11 @@ class HLedgerViewApp(App):
         tabbed_content.active = tab_id
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the hledger-tui application."""
     app = HLedgerViewApp()
     app.run()
+
+
+if __name__ == "__main__":
+    main()

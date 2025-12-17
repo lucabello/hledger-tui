@@ -20,6 +20,9 @@ Homepage = "https://github.com/lucabello/hledger-tui"
 Repository = "https://github.com/lucabello/hledger-tui"
 Issues = "https://github.com/lucabello/hledger-tui/issues"
 
+[project.scripts]
+hledger-tui = "hledger_tui.app:main"
+
 [dependency-groups]
 dev = [
     "pyright",
@@ -41,7 +44,6 @@ explicit = true
 
 [tool.ruff]
 line-length = 99
-
 
 [lint.pydocstyle]
 convention = "google"
