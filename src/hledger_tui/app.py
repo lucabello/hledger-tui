@@ -63,10 +63,10 @@ def main(
     For more information, visit: https://github.com/lucabello/hledger-tui
     """
     if serve:
-        # Run in web app mode using textual serve
+        # Run in web app mode using textual serve with --command
         try:
             subprocess.run(
-                ["textual", "serve", "hledger_tui.app:HLedgerTUIApp"],
+                ["textual", "serve", "--command", "hledger-tui"],
                 check=True,
             )
         except subprocess.CalledProcessError as e:
