@@ -29,7 +29,7 @@ class HLedgerAssets(Widget):
 
         AccountsDataTable {
             width: auto;
-            min-width: 20%;
+            min-width: 40;
             max-width: 60%;
             height: 100%;
             border: round $border;

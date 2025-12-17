@@ -7,6 +7,8 @@ account assets:savings            ; Savings account
 account assets:investments        ; Investment account
 account liabilities:creditcard    ; Credit card
 account expenses:food             ; Food and groceries
+account expenses:food:groceries   ; Food and groceries
+account expenses:food:restaurants ; Food and groceries
 account expenses:utilities        ; Utilities (water, electricity, etc.)
 account expenses:transport        ; Transportation costs
 account expenses:entertainment    ; Entertainment and leisure
@@ -36,7 +38,7 @@ tag trip
     income:salary
 
 2025-01-07 * Grocery Store | Weekly shopping  ; trip:Earth
-    expenses:food                € 85.50
+    expenses:food:groceries      € 85.50
     assets:checking
 
 2025-01-10 * Landlord | Monthly rent payment
@@ -52,7 +54,7 @@ tag trip
     liabilities:creditcard
 
 2025-01-18 * Restaurant | Dinner with friends  ; trip:Earth
-    expenses:food                € 42.80
+    expenses:food:restaurant     € 42.80
     liabilities:creditcard
 
 2025-01-20 * Online Store | Books and supplies
@@ -291,6 +293,32 @@ tag trip
 2025-06-30 * Credit Card | Payment
     liabilities:creditcard       € 450.00
     assets:checking
+
+; === Recent Transactions (November 2024) ===
+2025-11-05 * Employer | Monthly salary
+    assets:checking              € 3200.00
+    income:salary
+
+2025-11-07 * Grocery Store | Weekly shopping  ; trip:Mars
+    expenses:food                € 102.50
+    assets:checking
+
+2025-11-10 * Landlord | Monthly rent payment
+    expenses:home:rent           € 800.00
+    assets:checking
+
+2025-11-12 * Electric Company | December electricity bill  ; trip:Mars
+    expenses:home:utilities      € 78.60
+    assets:checking
+
+2025-11-15 * Shopping Mall | Holiday gifts  ; trip:Mars
+    expenses:shopping            € 245.00
+    liabilities:creditcard
+
+2025-11-16 * Grocery Store | Weekly shopping  ; trip:Mars
+    expenses:food                € 88.90
+    assets:checking
+
 
 ; === Recent Transactions (December 2024) ===
 2025-12-05 * Employer | Monthly salary

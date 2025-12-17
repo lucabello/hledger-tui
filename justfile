@@ -66,7 +66,7 @@ clean:
 #     fi
 #     gh release create "v${pyproject_release}" --generate-notes --notes-start-tag="${latest_release}"
 
-# Run the app with hledger-tui
+# Run the app with Textual
 [group("dev")]
 run:
 	uv run textual run src/hledger_tui/app.py --dev
