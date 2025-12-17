@@ -11,8 +11,8 @@ from hledger_tui.ui.tabs.balance import HLedgerBalanceTab
 from hledger_tui.ui.tabs.statistics import HLedgerStatisticsTab
 
 
-class HLedgerViewApp(App):
-    TITLE = "HLedger View"
+class HLedgerTUIApp(App):
+    TITLE = "HLedger TUI"
     SUB_TITLE = "Observe your finances"
 
     def on_mount(self) -> None:
@@ -37,7 +37,7 @@ class HLedgerViewApp(App):
 
 def main():
     """Entry point for the hledger-tui application."""
-    app = HLedgerViewApp()
+    app = HLedgerTUIApp()
     app.run()
 
 

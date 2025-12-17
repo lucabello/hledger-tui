@@ -1,7 +1,6 @@
 [project]
 name = "hledger-tui"
 version = "0.0.1"
-license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [
     {name = "Luca Bello", email = "lusgabello@gmail.com"},
