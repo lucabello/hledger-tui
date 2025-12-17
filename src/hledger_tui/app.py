@@ -45,14 +45,26 @@ def main(
         "--serve",
         help="Run the app in web app mode, accessible via browser",
     ),
+    host: str = typer.Option(
+        "localhost",
+        "--host",
+        help="Host to bind the web server to (only used with --serve)",
+    ),
+    port: int = typer.Option(
+        8000,
+        "--port",
+        help="Port to bind the web server to (only used with --serve)",
+    ),
 ):
     """
     A beautiful, keyboard-driven terminal UI for viewing and analyzing your hledger financial data.
 
     \b
     Examples:
-      hledger-tui              Run in terminal mode
-      hledger-tui --serve      Run in web app mode (accessible via browser)
+      hledger-tui                              Run in terminal mode
+      hledger-tui --serve                      Run in web app mode (accessible via browser)
+      hledger-tui --serve --host 0.0.0.0       Run web app mode, accessible from any network interface
+      hledger-tui --serve --port 3000          Run web app mode on port 3000
 
     \b
     Environment Variables:
@@ -66,7 +78,16 @@ def main(
         # Run in web app mode using textual serve with --command
         try:
             subprocess.run(
-                ["textual", "serve", "--command", "hledger-tui"],
+                [
+                    "textual",
+                    "serve",
+                    "--command",
+                    "hledger-tui",
+                    "--host",
+                    host,
+                    "--port",
+                    str(port),
+                ],
                 check=True,
             )
         except subprocess.CalledProcessError as e:
