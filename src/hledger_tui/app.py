@@ -18,11 +18,6 @@ class HLedgerTUIApp(App):
     def on_mount(self) -> None:
         self.theme = "dracula"
 
-    async def on_unmount(self) -> None:
-        """Clean up resources when the app is closing."""
-        # This ensures proper cleanup of any async resources
-        pass
-
     def compose(self) -> ComposeResult:
         yield Header()
         with TabbedContent(initial="balanceByAccount"):
@@ -42,11 +37,6 @@ class HLedgerTUIApp(App):
 
 def main():
     """Entry point for the hledger-tui application."""
-    import warnings
-    
-    # Suppress aiohttp ClientSession warning on exit
-    warnings.filterwarnings("ignore", category=ResourceWarning, message=".*client_session.*")
-    
     app = HLedgerTUIApp()
     app.run()
 
