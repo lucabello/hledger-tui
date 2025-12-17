@@ -23,8 +23,24 @@ class CategoricalBalance:
 
     @property
     def commodity(self) -> str:
-        """Extract currency/commodity symbol from balance string."""
-        return self.balance.split()[0]
+        """Extract currency/commodity symbol from balance string.
+
+        Handles both formats:
+        - Symbol first: € 12, $ 100.50
+        - Symbol last: 12 EUR, 100.50 USD
+        """
+        parts = self.balance.split()
+        if len(parts) == 0:
+            return self.DEFAULT_COMMODITY
+
+        # Check if first part is numeric (possibly with sign, decimals, commas)
+        first_part = parts[0].lstrip("-+").replace(",", "").replace(".", "")
+        if first_part.isdigit():
+            # Numeric first means commodity is last
+            return parts[-1] if len(parts) > 1 else self.DEFAULT_COMMODITY
+        else:
+            # Non-numeric first means commodity is first
+            return parts[0]
 
     @property
     def balance_float(self) -> float:

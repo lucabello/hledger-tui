@@ -47,6 +47,36 @@ class TestCategoricalBalance:
         balance = CategoricalBalance("test", "€   100.00")
         assert balance.balance_float == 100.00
 
+    def test_commodity_symbol_first(self):
+        """Test commodity extraction with symbol before amount."""
+        balance = CategoricalBalance("test", "€ 100.00")
+        assert balance.commodity == "€"
+
+    def test_commodity_symbol_last(self):
+        """Test commodity extraction with symbol after amount."""
+        balance = CategoricalBalance("test", "100.00 EUR")
+        assert balance.commodity == "EUR"
+
+    def test_commodity_symbol_last_negative(self):
+        """Test commodity extraction with symbol after negative amount."""
+        balance = CategoricalBalance("test", "-50.25 USD")
+        assert balance.commodity == "USD"
+
+    def test_commodity_symbol_first_negative(self):
+        """Test commodity extraction with symbol before negative amount."""
+        balance = CategoricalBalance("test", "$ -75.50")
+        assert balance.commodity == "$"
+
+    def test_commodity_with_comma_separator(self):
+        """Test commodity extraction with comma as thousands separator."""
+        balance = CategoricalBalance("test", "1,250.00 GBP")
+        assert balance.commodity == "GBP"
+
+    def test_commodity_symbol_first_with_plus(self):
+        """Test commodity extraction with plus sign."""
+        balance = CategoricalBalance("test", "£ +200.00")
+        assert balance.commodity == "£"
+
 
 class TestPosting:
     """Test Posting model."""

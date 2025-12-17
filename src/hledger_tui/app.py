@@ -1,6 +1,7 @@
 from textual.app import App, ComposeResult
 from textual.widgets import (
     Footer,
+    Header,
     TabbedContent,
     TabPane,
 )
@@ -18,6 +19,7 @@ class HLedgerViewApp(App):
         self.theme = "dracula"
 
     def compose(self) -> ComposeResult:
+        yield Header()
         with TabbedContent(initial="balanceByAccount"):
             with TabPane("Expenses", id="balanceByAccount"):
                 yield HLedgerBalanceTab()

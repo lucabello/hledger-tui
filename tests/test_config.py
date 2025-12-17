@@ -8,7 +8,7 @@ class TestHLedgerConfigFromEnv:
 
     def test_config_from_env_with_custom_queries(self, monkeypatch):
         """Test that from_env() loads custom queries from environment variables."""
-        monkeypatch.setenv("HLEDGER_TUI_QUERIES", "acct:custom,not:acct:skip")
+        monkeypatch.setenv("HLEDGER_TUI_EXPENSE_QUERIES", "acct:custom,not:acct:skip")
 
         config = HLedgerConfig.from_env()
 
@@ -42,7 +42,7 @@ class TestHLedgerConfigFromEnv:
     def test_config_from_env_with_no_env_vars(self, monkeypatch):
         """Test that from_env() uses defaults when no environment variables are set."""
         # Clear any relevant env vars
-        monkeypatch.delenv("HLEDGER_TUI_QUERIES", raising=False)
+        monkeypatch.delenv("HLEDGER_TUI_EXPENSE_QUERIES", raising=False)
         monkeypatch.delenv("HLEDGER_TUI_DEPTH", raising=False)
         monkeypatch.delenv("HLEDGER_TUI_COMMODITY", raising=False)
 
@@ -55,7 +55,9 @@ class TestHLedgerConfigFromEnv:
 
     def test_config_from_env_strips_whitespace_from_queries(self, monkeypatch):
         """Test that query strings are properly stripped of whitespace."""
-        monkeypatch.setenv("HLEDGER_TUI_QUERIES", "acct:expenses , not:acct:test , acct:other")
+        monkeypatch.setenv(
+            "HLEDGER_TUI_EXPENSE_QUERIES", "acct:expenses , not:acct:test , acct:other"
+        )
 
         config = HLedgerConfig.from_env()
 
