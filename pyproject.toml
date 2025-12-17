@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
   "textual",
+  "textual-dev",
   "textual-plotext",
   "sh",
   "typer",

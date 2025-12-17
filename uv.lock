@@ -275,6 +275,7 @@ source = { editable = "." }
 dependencies = [
     { name = "sh" },
     { name = "textual" },
+    { name = "textual-dev" },
     { name = "textual-plotext" },
     { name = "typer" },
 ]
@@ -292,6 +293,7 @@ dev = [
 requires-dist = [
     { name = "sh" },
     { name = "textual" },
+    { name = "textual-dev" },
     { name = "textual-plotext" },
     { name = "typer" },
 ]
