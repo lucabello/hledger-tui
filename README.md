@@ -3,47 +3,17 @@
 A beautiful, keyboard-driven terminal UI for viewing and analyzing your [hledger](https://hledger.org/) financial data. Built with [Textual](https://textual.textualize.io/), this TUI provides an intuitive interface to explore your expenses, assets, and financial statistics.
 
 <p align="center">
-  <em>Visualize your finances without leaving the terminal</em>
+  <em>Observe your finances without leaving the terminal!</em>
 </p>
 
 ## ✨ Features
 
-### 📊 Expenses Tab
-
-- **Categorized Expenses**: View your expenses organized by account hierarchy
-- **Period Navigation**: Move through time periods using `←` and `→` arrow keys
-- **Flexible Time Periods**: Switch between weeks (`w`), months (`m`), quarters, and years (`y`)
-- **Account Depth Control**: Cycle through different account hierarchy levels with `d`
-- **Bar Charts**: Compare expenses across accounts at a glance
-- **Tag Pivot Analysis**: Group expenses by tags with `T` - perfect for project tracking
-- **Account Overview**: Press `o` to see detailed balance history for any account
-- **Transaction View**: Press `t` to list all transactions for an account
-- **Reset View**: Return to default view with `r`
-
-### 💰 Assets Tab
-
-- **Asset Tracking**: Monitor balances of your assets over time
-- **Historical Charts**: Interactive line charts showing asset value progression
-- **Time Period Controls**: Navigate through periods or view all-time data with `a`
-- **Customizable Subdivisions**: View data by day (`D`), week (`W`), month (`M`), or year (`Y`)
-- **Account Depth**: Adjust hierarchy depth with `d` to see summaries or detailed breakdowns
-- **Account Overview**: Press `o` for detailed balance history of selected accounts
-- **Transaction Details**: View transactions for any asset with `t`
-
-### 📈 Statistics Tab
-
-- **Journal Insights**: Comprehensive overview of your hledger journal
-- **File Information**: See which journal files are being used
-- **Account Summary**: Total number of accounts and detailed listings
-- **Commodity Tracking**: View all commodities used in your journal
-- **Transaction Statistics**: Count of transactions and other journal metrics
-- **Date Ranges**: See the span of your financial data
-
-### ⌨️ General Features
-
-- **Keyboard-First Design**: All features accessible via keyboard shortcuts
-- **Context-Sensitive Footer**: Shows available actions based on current view
-- **Real-Time Updates**: Data refreshes as you navigate
+- **📊 Expenses Analysis**: Categorized expense tracking with bar charts, tag pivoting, and flexible time period navigation (weeks, months, quarters, years)
+- **💰 Asset Monitoring**: Track asset balances over time with interactive line charts and customizable time subdivisions (day, week, month, year)
+- **📈 Statistics Dashboard**: Comprehensive journal insights including account summaries, commodity tracking, and transaction metrics
+- **🔍 Detailed Views**: Dive into account overviews, transaction lists, and balance histories for any account
+- **⌨️ Keyboard-Driven**: Fast navigation with intuitive keyboard shortcuts and context-sensitive footer
+- **🎨 Visual Charts**: Compare data across accounts and time periods with built-in bar and line charts
 
 ## 📋 Requirements
 
@@ -57,6 +27,12 @@ A beautiful, keyboard-driven terminal UI for viewing and analyzing your [hledger
 pip install hledger-tui
 ```
 
+Or try it without installing (requires [uv](https://docs.astral.sh/uv/)):
+
+```bash
+uvx hledger-tui
+```
+
 ## 🎮 Usage
 
 1. **Set up your environment**:
@@ -67,6 +43,11 @@ pip install hledger-tui
 2. **Launch the TUI**:
    ```bash
    hledger-tui
+   ```
+   
+   Or alternatively:
+   ```bash
+   hledger tui
    ```
 
 That's it! Use the keyboard shortcuts shown in the footer to navigate and explore your financial data.
