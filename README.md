@@ -6,6 +6,23 @@ A beautiful, keyboard-driven terminal UI for viewing and analyzing your [hledger
   <em>Observe your finances without leaving the terminal!</em>
 </p>
 
+
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/d2e28224-c2a7-44ac-90e5-4c040863bfdb" alt="Expenses Balance" width="300"/></td>
+    <td><img src="https://github.com/user-attachments/assets/de723952-dbb4-4987-adbf-b95be07071b7" alt="Tag Pivot" width="300"/></td>
+    <td><img src="https://github.com/user-attachments/assets/843a833a-a721-4415-bd78-0f536683b0c8" alt="Expenses Balance by Tag" width="300"/></td>
+    <td><img src="https://github.com/user-attachments/assets/843a833a-a721-4415-bd78-0f536683b0c8" alt="Overview of a tag" width="300"/></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/d257d651-1372-49fd-b6be-a9da8bcd5e03" alt="Assets Balance" width="300"/></td>
+    <td><img src="https://github.com/user-attachments/assets/b5d0a0e4-c611-4082-ad35-484504df0fd3" alt="Transactions List" width="300"/></td>
+    <td><img src="https://github.com/user-attachments/assets/2ee19b3b-ed77-44a2-b5d9-7ef2b74d03fe" alt="Statistics" width="300"/></td>
+    <td><img src="https://github.com/user-attachments/assets/b069d7d2-0c8c-4e25-b7fc-7471723d149d" alt="Command Palette" width="300"/></td>
+  </tr>
+</table>
+
+
 ## ✨ Features
 
 - **📊 Expenses Analysis**: Categorized expense tracking with bar charts, tag pivoting, and flexible time period navigation (weeks, months, quarters, years)
@@ -52,7 +69,7 @@ uvx hledger-tui
 
 That's it! Use the keyboard shortcuts shown in the footer to navigate and explore your financial data.
 
-## �� Development
+## 🔧 Development
 
 ### Prerequisites
 - [uv](https://github.com/astral-sh/uv) for dependency management
