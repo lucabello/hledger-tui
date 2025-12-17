@@ -23,7 +23,7 @@ tag occasion
 tag trip
 
 ; === Opening Balances ===
-2024-01-01 * Opening Balances
+2025-01-01 * Opening Balances
     assets:checking              € 2500.00
     assets:savings               € 5000.00
     assets:investments           € 10000.00
@@ -31,288 +31,288 @@ tag trip
     equity:opening
 
 ; === January 2024 ===
-2024-01-05 * Employer | Monthly salary
+2025-01-05 * Employer | Monthly salary
     assets:checking              € 3200.00
     income:salary
 
-2024-01-07 * Grocery Store | Weekly shopping  ; trip:Earth
+2025-01-07 * Grocery Store | Weekly shopping  ; trip:Earth
     expenses:food                € 85.50
     assets:checking
 
-2024-01-10 * Landlord | Monthly rent payment
+2025-01-10 * Landlord | Monthly rent payment
     expenses:home:rent           € 800.00
     assets:checking
 
-2024-01-12 * Electric Company | January electricity bill
+2025-01-12 * Electric Company | January electricity bill
     expenses:home:utilities      € 65.30
     assets:checking
 
-2024-01-15 * Gas Station | Fuel refill
+2025-01-15 * Gas Station | Fuel refill
     expenses:transport           € 55.00
     liabilities:creditcard
 
-2024-01-18 * Restaurant | Dinner with friends  ; trip:Earth
+2025-01-18 * Restaurant | Dinner with friends  ; trip:Earth
     expenses:food                € 42.80
     liabilities:creditcard
 
-2024-01-20 * Online Store | Books and supplies
+2025-01-20 * Online Store | Books and supplies
     expenses:shopping            € 78.90
     liabilities:creditcard
 
-2024-01-22 * Grocery Store | Weekend groceries  ; trip:Earth
+2025-01-22 * Grocery Store | Weekend groceries  ; trip:Earth
     expenses:food                € 92.30
     assets:checking
 
-2024-01-25 * Credit Card | Payment
+2025-01-25 * Credit Card | Payment
     liabilities:creditcard       € 500.00
     assets:checking
 
-2024-01-28 * Cinema | Movie night
+2025-01-28 * Cinema | Movie night
     expenses:entertainment       € 28.00
     assets:checking
 
 ; === February 2024 ===
-2024-02-01 * Internal Transfer | To savings account
+2025-02-01 * Internal Transfer | To savings account
     assets:savings               € 500.00
     assets:checking
 
-2024-02-05 * Employer | Monthly salary
+2025-02-05 * Employer | Monthly salary
     assets:checking              € 3200.00
     income:salary
 
-2024-02-08 * Grocery Store | Weekly shopping  ; trip:Earth
+2025-02-08 * Grocery Store | Weekly shopping  ; trip:Earth
     expenses:food                € 88.70
     assets:checking
 
-2024-02-10 * Landlord | Monthly rent payment
+2025-02-10 * Landlord | Monthly rent payment
     expenses:home:rent           € 800.00
     assets:checking
 
-2024-02-12 * Water Company | February water bill
+2025-02-12 * Water Company | February water bill
     expenses:home:utilities      € 32.50
     assets:checking
 
-2024-02-14 * Restaurant | Valentine's Day dinner  ; trip:Saturn, occasion:special
+2025-02-14 * Restaurant | Valentine's Day dinner  ; trip:Saturn, occasion:special
     expenses:food                € 95.00
     liabilities:creditcard
 
-2024-02-16 * Pharmacy | Medicine purchase
+2025-02-16 * Pharmacy | Medicine purchase
     expenses:healthcare          € 23.50
     assets:checking
 
-2024-02-20 * Gas Station | Fuel refill
+2025-02-20 * Gas Station | Fuel refill
     expenses:transport           € 58.00
     liabilities:creditcard
 
-2024-02-23 * Grocery Store | Weekly shopping  ; trip:Saturn
+2025-02-23 * Grocery Store | Weekly shopping  ; trip:Saturn
     expenses:food                € 75.60
     assets:checking
 
-2024-02-25 * Bank | Monthly account fee
+2025-02-25 * Bank | Monthly account fee
     expenses:financial           € 5.00
     assets:checking
 
-2024-02-28 * Credit Card | Payment
+2025-02-28 * Credit Card | Payment
     liabilities:creditcard       € 300.00
     assets:checking
 
 ; === March 2024 ===
-2024-03-05 * Employer | Monthly salary
+2025-03-05 * Employer | Monthly salary
     assets:checking              € 3200.00
     income:salary
 
-2024-03-07 * Grocery Store | Weekly shopping  ; trip:Saturn
+2025-03-07 * Grocery Store | Weekly shopping  ; trip:Saturn
     expenses:food                € 91.20
     assets:checking
 
-2024-03-10 * Landlord | Monthly rent payment
+2025-03-10 * Landlord | Monthly rent payment
     expenses:home:rent           € 800.00
     assets:checking
 
-2024-03-12 * Electric Company | March electricity bill
+2025-03-12 * Electric Company | March electricity bill
     expenses:home:utilities      € 70.80
     assets:checking
 
-2024-03-15 * Fashion Store | New spring wardrobe
+2025-03-15 * Fashion Store | New spring wardrobe
     expenses:shopping            € 145.00
     liabilities:creditcard
 
-2024-03-18 * Concert Hall | Live music event  ; trip:Saturn
+2025-03-18 * Concert Hall | Live music event  ; trip:Saturn
     expenses:entertainment       € 85.00
     assets:checking
 
-2024-03-20 * Gas Station | Fuel refill  ; trip:Saturn
+2025-03-20 * Gas Station | Fuel refill  ; trip:Saturn
     expenses:transport           € 52.00
     liabilities:creditcard
 
-2024-03-22 * Grocery Store | Weekly shopping  ; trip:Saturn
+2025-03-22 * Grocery Store | Weekly shopping  ; trip:Saturn
     expenses:food                € 82.40
     assets:checking
 
-2024-03-25 * Medical Center | Annual checkup
+2025-03-25 * Medical Center | Annual checkup
     expenses:healthcare          € 60.00
     assets:checking
 
-2024-03-28 * Restaurant | Weekend lunch  ; trip:Saturn
+2025-03-28 * Restaurant | Weekend lunch  ; trip:Saturn
     expenses:food                € 48.50
     liabilities:creditcard
 
-2024-03-30 * Credit Card | Payment
+2025-03-30 * Credit Card | Payment
     liabilities:creditcard       € 400.00
     assets:checking
 
 ; === April 2024 ===
-2024-04-01 * Internal Transfer | To savings account
+2025-04-01 * Internal Transfer | To savings account
     assets:savings               € 600.00
     assets:checking
 
-2024-04-05 * Employer | Monthly salary
+2025-04-05 * Employer | Monthly salary
     assets:checking              € 3200.00
     income:salary
 
-2024-04-08 * Grocery Store | Weekly shopping  ; trip:Saturn
+2025-04-08 * Grocery Store | Weekly shopping  ; trip:Saturn
     expenses:food                € 95.80
     assets:checking
 
-2024-04-10 * Landlord | Monthly rent payment
+2025-04-10 * Landlord | Monthly rent payment
     expenses:home:rent           € 800.00
     assets:checking
 
-2024-04-12 * Water Company | April water bill
+2025-04-12 * Water Company | April water bill
     expenses:home:utilities      € 35.20
     assets:checking
 
-2024-04-15 * Gas Station | Fuel refill
+2025-04-15 * Gas Station | Fuel refill
     expenses:transport           € 60.00
     liabilities:creditcard
 
-2024-04-18 * Bookstore | New novels  ; trip:Saturn
+2025-04-18 * Bookstore | New novels  ; trip:Saturn
     expenses:shopping            € 42.00
     assets:checking
 
-2024-04-20 * Grocery Store | Weekly shopping  ; trip:Venus
+2025-04-20 * Grocery Store | Weekly shopping  ; trip:Venus
     expenses:food                € 87.90
     assets:checking
 
-2024-04-23 * Netflix | Monthly subscription  ; trip:Venus
+2025-04-23 * Netflix | Monthly subscription  ; trip:Venus
     expenses:entertainment       € 25.00
     assets:checking
 
-2024-04-28 * Restaurant | Sunday brunch  ; trip:Venus
+2025-04-28 * Restaurant | Sunday brunch  ; trip:Venus
     expenses:food                € 55.00
     liabilities:creditcard
 
-2024-04-30 * Credit Card | Payment
+2025-04-30 * Credit Card | Payment
     liabilities:creditcard       € 250.00
     assets:checking
 
 ; === May 2024 ===
-2024-05-05 * Employer | Monthly salary
+2025-05-05 * Employer | Monthly salary
     assets:checking              € 3200.00
     income:salary
 
-2024-05-07 * Grocery Store | Weekly shopping  ; trip:Venus
+2025-05-07 * Grocery Store | Weekly shopping  ; trip:Venus
     expenses:food                € 89.50
     assets:checking
 
-2024-05-10 * Landlord | Monthly rent payment
+2025-05-10 * Landlord | Monthly rent payment
     expenses:home:rent           € 800.00
     assets:checking
 
-2024-05-12 * Electric Company | May electricity bill
+2025-05-12 * Electric Company | May electricity bill
     expenses:home:utilities      € 62.40
     assets:checking
 
-2024-05-15 * Broker | ETF purchase
+2025-05-15 * Broker | ETF purchase
     assets:investments           € 1000.00
     assets:checking
 
-2024-05-18 * Gas Station | Fuel refill
+2025-05-18 * Gas Station | Fuel refill
     expenses:transport           € 54.00
     liabilities:creditcard
 
-2024-05-20 * Grocery Store | Weekly shopping  ; trip:Venus
+2025-05-20 * Grocery Store | Weekly shopping  ; trip:Venus
     expenses:food                € 93.20
     assets:checking
 
-2024-05-23 * Gym | Monthly membership fee  ; trip:Venus
+2025-05-23 * Gym | Monthly membership fee  ; trip:Venus
     expenses:entertainment       € 45.00
     assets:checking
 
-2024-05-27 * Restaurant | Birthday dinner  ; trip:Venus
+2025-05-27 * Restaurant | Birthday dinner  ; trip:Venus
     expenses:food                € 62.00
     liabilities:creditcard
 
-2024-05-30 * Credit Card | Payment
+2025-05-30 * Credit Card | Payment
     liabilities:creditcard       € 300.00
     assets:checking
 
 ; === June 2024 ===
-2024-06-05 * Employer | Monthly salary  occasion:christmas
+2025-06-05 * Employer | Monthly salary  occasion:christmas
     assets:checking              € 3200.00
     income:salary
 
-2024-06-07 * Grocery Store | Weekly shopping  ; occasion:christmas
+2025-06-07 * Grocery Store | Weekly shopping  ; occasion:christmas
     expenses:food                € 96.30
     assets:checking
 
-2024-06-10 * Landlord | Monthly rent payment  occasion:christmas
+2025-06-10 * Landlord | Monthly rent payment  occasion:christmas
     expenses:home:rent           € 800.00
     assets:checking
 
-2024-06-12 * Water Company | June water bill
+2025-06-12 * Water Company | June water bill
     expenses:home:utilities      € 38.90
     assets:checking
 
-2024-06-15 * Internal Transfer | To savings account
+2025-06-15 * Internal Transfer | To savings account
     assets:savings               € 700.00
     assets:checking
 
-2024-06-18 * Gas Station | Fuel refill  ; trip:Jupiter
+2025-06-18 * Gas Station | Fuel refill  ; trip:Jupiter
     expenses:transport           € 56.00
     liabilities:creditcard
 
-2024-06-20 * Grocery Store | Weekly shopping  ; trip:Jupiter
+2025-06-20 * Grocery Store | Weekly shopping  ; trip:Jupiter
     expenses:food                € 84.70
     assets:checking
 
-2024-06-23 * Electronics Store | New headphones  ; trip:Jupiter
+2025-06-23 * Electronics Store | New headphones  ; trip:Jupiter
     expenses:shopping            € 189.00
     liabilities:creditcard
 
-2024-06-25 * Restaurant | Lunch meeting  ; trip:Jupiter
+2025-06-25 * Restaurant | Lunch meeting  ; trip:Jupiter
     expenses:food                € 51.50
     liabilities:creditcard
 
-2024-06-28 * Pharmacy | Vitamins and supplements
+2025-06-28 * Pharmacy | Vitamins and supplements
     expenses:healthcare          € 18.50
     assets:checking
 
-2024-06-30 * Credit Card | Payment
+2025-06-30 * Credit Card | Payment
     liabilities:creditcard       € 450.00
     assets:checking
 
 ; === Recent Transactions (December 2024) ===
-2024-12-05 * Employer | Monthly salary
+2025-12-05 * Employer | Monthly salary
     assets:checking              € 3200.00
     income:salary
 
-2024-12-07 * Grocery Store | Weekly shopping  ; trip:Mars
+2025-12-07 * Grocery Store | Weekly shopping  ; trip:Mars
     expenses:food                € 102.50
     assets:checking
 
-2024-12-10 * Landlord | Monthly rent payment
+2025-12-10 * Landlord | Monthly rent payment
     expenses:home:rent           € 800.00
     assets:checking
 
-2024-12-12 * Electric Company | December electricity bill  ; trip:Mars
+2025-12-12 * Electric Company | December electricity bill  ; trip:Mars
     expenses:home:utilities      € 78.60
     assets:checking
 
-2024-12-15 * Shopping Mall | Holiday gifts  ; trip:Mars
+2025-12-15 * Shopping Mall | Holiday gifts  ; trip:Mars
     expenses:shopping            € 245.00
     liabilities:creditcard
 
-2024-12-16 * Grocery Store | Weekly shopping  ; trip:Mars
+2025-12-16 * Grocery Store | Weekly shopping  ; trip:Mars
     expenses:food                € 88.90
     assets:checking
