@@ -69,6 +69,38 @@ uvx hledger-tui
 
 That's it! Use the keyboard shortcuts shown in the footer to navigate and explore your financial data.
 
+## ⚙️ Configuration
+
+You can customize hledger-tui behavior using environment variables. All configuration options are optional and fall back to sensible defaults.
+
+### Environment Variables
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `LEDGER_FILE` | **Required**. Path to your hledger journal file | None | `/path/to/journal.ledger` |
+| `HLEDGER_TUI_EXPENSE_QUERIES` | Comma-separated queries for expense filtering | `acct:expenses, not:acct:financial, not:acct:home:rent, not:acct:home:utilities` | `acct:expenses, not:tag:excluded` |
+| `HLEDGER_TUI_TAG_QUERIES` | Comma-separated queries for tag filtering | `acct:expenses` | `acct:expenses, acct:income` |
+| `HLEDGER_TUI_ASSETS_QUERIES` | Comma-separated queries for asset filtering | `acct:assets, acct:liabilities, acct:budget` | `acct:assets, acct:liabilities` |
+| `HLEDGER_TUI_DEPTH` | Default depth for account hierarchy display | `2` | `3` |
+| `HLEDGER_TUI_COMMODITY` | Default commodity symbol for display | `€` | `$` |
+
+### Example Configuration
+
+```bash
+# Basic setup with required variable
+export LEDGER_FILE=/path/to/journal.ledger
+
+# Customize expense tracking
+export HLEDGER_TUI_EXPENSE_QUERIES="acct:expenses, not:acct:mortgage"
+
+# Change default display settings
+export HLEDGER_TUI_DEPTH=3
+export HLEDGER_TUI_COMMODITY="$"
+
+# Run the app
+hledger-tui
+```
+
 ## 🔧 Development
 
 ### Prerequisites
