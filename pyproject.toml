@@ -1,6 +1,6 @@
 [project]
 name = "hledger-tui"
-version = "0.0.1"
+version = "0.0.2"
 license-files = ["LICENSE"]
 authors = [
     {name = "Luca Bello", email = "lusgabello@gmail.com"},
