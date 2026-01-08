@@ -4,6 +4,11 @@ set shell := ["bash", "-c"]
 default:
   just --list
 
+# Update uv.lock dependencies
+[group("dev")]
+lock:
+    uv lock --upgrade --no-cache
+
 # Run all quality checks
 [group("dev")]
 check: format lint test
