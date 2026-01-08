@@ -1,5 +1,10 @@
 # hledger-tui
 
+[![PyPi Release](https://img.shields.io/pypi/v/docker-captain?label=PyPi&color=blue)](https://pypi.org/project/hledger-tui/)
+[![GitHub Release](https://img.shields.io/github/v/release/lucabello/hledger-tui?label=GitHub&color=blue)](https://github.com/lucabello/hledger-tui/releases)
+[![Publish to PyPi](https://github.com/lucabello/hledger-tui/actions/workflows/publish.yaml/badge.svg)](https://github.com/lucabello/hledger-tui/actions/workflows/publish.yaml)
+![Commits Since Release](https://img.shields.io/github/commits-since/lucabello/hledger-tui/latest?label=Commits%20since%20last%20release&color=darkgreen)
+
 A beautiful, keyboard-driven terminal UI for viewing and analyzing your [hledger](https://hledger.org/) financial data. Built with [Textual](https://textual.textualize.io/), this TUI provides an intuitive interface to explore your expenses, assets, and financial statistics.
 
 <p align="center">
