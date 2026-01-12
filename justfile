@@ -1,5 +1,7 @@
 set shell := ["bash", "-c"]
 
+export UV_FROZEN := "true"
+
 [private]
 default:
   just --list
@@ -17,26 +19,26 @@ check: format lint test
 [group("dev")]
 lint: && format
     # Lint the code
-    ruff check
+    uv run ruff check
     # Run static checks
-    pyright src
+    uv run pyright src
     # Check for dead code
-    vulture src --min-confidence=80 --ignore-names="parameters"
+    uv run vulture src --min-confidence=80 --ignore-names="parameters"
 
 # Format the codebase using ruff
 [group("dev")]
 format:
     # Fix generic linting issues
-    ruff check --fix-only
+    uv run ruff check --fix-only
     # Fix import-related issues (including ordering)
-    ruff check --select=I --fix-only
+    uv run ruff check --select=I --fix-only
     # Format the code
-    ruff format
+    uv run ruff format
 
 # Run tests
 [group("dev")]
 test:
-    pytest
+    uv run pytest
 
 # Build the project
 [group("build")]
