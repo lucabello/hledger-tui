@@ -1,7 +1,5 @@
 """Tests for core data models."""
 
-import pytest
-
 from hledger_tui.core.models import (
     AccountHistoricalBalance,
     CategoricalBalance,
@@ -37,10 +35,9 @@ class TestCategoricalBalance:
     def test_balance_with_large_number(self):
         """Test balance with thousands separator."""
         balance = CategoricalBalance("assets:investments", "€ 1,250.50")
-        # Note: This will raise ValueError if not handled properly
-        # Our current implementation doesn't handle commas
-        with pytest.raises(ValueError):
-            _ = balance.balance_float
+        # Now that we have a proper parser, this should work correctly
+        assert balance.commodity == "€"
+        assert balance.balance_float == 1250.50
 
     def test_balance_multiple_spaces(self):
         """Test balance with extra spaces."""

@@ -1,5 +1,4 @@
 import subprocess
-import sys
 
 import typer
 from textual.app import App, ComposeResult
