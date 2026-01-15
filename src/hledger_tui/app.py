@@ -1,4 +1,7 @@
+import os
 import subprocess
+from pathlib import Path
+from typing import Optional
 
 import typer
 from textual.app import App, ComposeResult
@@ -39,6 +42,12 @@ class HLedgerTUIApp(App):
 
 
 def main(
+    file: Optional[str] = typer.Option(
+        None,
+        "-f",
+        "--file",
+        help="Path to your hledger journal file. Takes precedence over LEDGER_FILE environment variable.",
+    ),
     serve: bool = typer.Option(
         False,
         "--serve",
@@ -61,18 +70,34 @@ def main(
     \b
     Examples:
       hledger-tui                              Run in terminal mode
+      hledger-tui -f /path/to/journal.ledger   Run with specific ledger file
       hledger-tui --serve                      Run in web app mode (accessible via browser)
       hledger-tui --serve --host 0.0.0.0       Run web app mode, accessible from any network interface
       hledger-tui --serve --port 3000          Run web app mode on port 3000
 
     \b
     Environment Variables:
-      LEDGER_FILE              Path to your hledger journal file (required)
+      LEDGER_FILE              Path to your hledger journal file (can be overridden with -f/--file)
       HLEDGER_TUI_DEPTH        Default depth for account hierarchy display
       HLEDGER_TUI_COMMODITY    Default commodity symbol for display
 
     For more information, visit: https://github.com/lucabello/hledger-tui
     """
+    # Set LEDGER_FILE if --file flag is provided (takes precedence over environment variable)
+    if file:
+        file_path = Path(file).expanduser().resolve()
+        if not file_path.exists():
+            typer.echo(f"Error: Ledger file not found: {file_path}", err=True)
+            raise typer.Exit(1)
+        os.environ["LEDGER_FILE"] = str(file_path)
+
+    # Verify LEDGER_FILE is set
+    if not os.getenv("LEDGER_FILE"):
+        typer.echo(
+            "Error: LEDGER_FILE environment variable is not set and no file was specified with -f/--file",
+            err=True,
+        )
+        raise typer.Exit(1)
     if serve:
         # Run in web app mode using textual serve with --command
         try:

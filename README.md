@@ -41,7 +41,7 @@ A beautiful, keyboard-driven terminal UI for viewing and analyzing your [hledger
 
 - **Python** >= 3.10
 - **hledger** >= 1.25 installed and available on your PATH
-- **LEDGER_FILE** environment variable pointing to your hledger journal file
+- **LEDGER_FILE** environment variable or `-f`/`--file` flag specifying your hledger journal file
 
 ## 💾 Installation
 
@@ -57,7 +57,7 @@ uvx hledger-tui
 
 ## 🎮 Usage
 
-1. **Set up your environment**:
+1. **Set up your environment** (optional if using `-f` flag):
    ```bash
    export LEDGER_FILE=/path/to/your/journal.ledger
    ```
@@ -65,6 +65,11 @@ uvx hledger-tui
 2. **Launch the TUI**:
    ```bash
    hledger-tui
+   ```
+   
+   Or with a specific ledger file:
+   ```bash
+   hledger-tui -f /path/to/your/journal.ledger
    ```
    
    Or alternatively:
@@ -83,8 +88,9 @@ uvx hledger-tui
 
 ### Command-Line Options
 
-- `--help`: Show help message with all available options and examples
+- `-f`, `--file`: Specify the path to your hledger journal file (takes precedence over `LEDGER_FILE` environment variable)
 - `--serve`: Run the app in web app mode, accessible via browser
+- `--help`: Show help message with all available options and examples
 
 That's it! Use the keyboard shortcuts shown in the footer to navigate and explore your financial data.
 
@@ -96,7 +102,7 @@ You can customize hledger-tui behavior using environment variables. All configur
 
 | Variable | Description | Default | Example |
 |----------|-------------|---------|---------|
-| `LEDGER_FILE` | **Required**. Path to your hledger journal file | None | `/path/to/journal.ledger` |
+| `LEDGER_FILE` | Path to your hledger journal file (can be overridden with `-f` flag) | None | `/path/to/journal.ledger` |
 | `HLEDGER_TUI_EXPENSE_QUERIES` | Comma-separated queries for expense filtering | `acct:expenses, not:acct:financial, not:acct:home:rent, not:acct:home:utilities` | `acct:expenses, not:tag:excluded` |
 | `HLEDGER_TUI_TAG_QUERIES` | Comma-separated queries for tag filtering | `acct:expenses` | `acct:expenses, acct:income` |
 | `HLEDGER_TUI_ASSETS_QUERIES` | Comma-separated queries for asset filtering | `acct:assets, acct:liabilities, acct:budget` | `acct:assets, acct:liabilities` |
