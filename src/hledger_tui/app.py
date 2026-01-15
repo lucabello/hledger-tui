@@ -90,7 +90,7 @@ def main(
             typer.echo(f"Error: Ledger file not found: {file_path}", err=True)
             raise typer.Exit(1)
         os.environ["LEDGER_FILE"] = str(file_path)
-    
+
     # Verify LEDGER_FILE is set
     if not os.getenv("LEDGER_FILE"):
         typer.echo(
