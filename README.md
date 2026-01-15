@@ -40,7 +40,7 @@ A beautiful, keyboard-driven terminal UI for viewing and analyzing your [hledger
 ## 📋 Requirements
 
 - **Python** >= 3.10
-- **hledger** installed and available on your PATH
+- **hledger** >= 1.25 installed and available on your PATH
 - **LEDGER_FILE** environment variable pointing to your hledger journal file
 
 ## 💾 Installation
