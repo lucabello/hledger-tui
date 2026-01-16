@@ -1,6 +1,6 @@
 # hledger-tui
 
-[![PyPi Release](https://img.shields.io/pypi/v/docker-captain?label=PyPi&color=blue)](https://pypi.org/project/hledger-tui/)
+[![PyPi Release](https://img.shields.io/pypi/v/hledger-tui?label=PyPi&color=blue)](https://pypi.org/project/hledger-tui/)
 [![GitHub Release](https://img.shields.io/github/v/release/lucabello/hledger-tui?label=GitHub&color=blue)](https://github.com/lucabello/hledger-tui/releases)
 [![Publish to PyPi](https://github.com/lucabello/hledger-tui/actions/workflows/publish.yaml/badge.svg)](https://github.com/lucabello/hledger-tui/actions/workflows/publish.yaml)
 ![Commits Since Release](https://img.shields.io/github/commits-since/lucabello/hledger-tui/latest?label=Commits%20since%20last%20release&color=darkgreen)
