@@ -424,3 +424,173 @@ class TestHLedgerCurrencyConversion:
         # Should only call once
         assert first_commodity_calls == 1
         assert second_commodity_calls == 1  # Still 1, not 2
+
+
+class TestHLedgerExtraOptions:
+    """Test extra options functionality."""
+
+    def test_parse_extra_options_boolean_flags(self):
+        """Test parsing boolean flags like --cost."""
+        options = ["--cost", "--no-total"]
+
+        result = HLedger._parse_extra_options(options)
+
+        assert result == {"cost": True, "no_total": True}
+
+    def test_parse_extra_options_key_value_pairs(self):
+        """Test parsing key-value pairs like --depth 3."""
+        options = ["--depth", "3", "--exchange", "USD"]
+
+        result = HLedger._parse_extra_options(options)
+
+        assert result == {"depth": "3", "exchange": "USD"}
+
+    def test_parse_extra_options_mixed(self):
+        """Test parsing mix of flags and key-value pairs."""
+        options = ["--cost", "--depth", "4", "--no-total"]
+
+        result = HLedger._parse_extra_options(options)
+
+        assert result == {"cost": True, "depth": "4", "no_total": True}
+
+    def test_parse_extra_options_short_flags(self):
+        """Test parsing short flags like -V."""
+        options = ["-V", "-b", "2024-01-01"]
+
+        result = HLedger._parse_extra_options(options)
+
+        assert result == {"V": True, "b": "2024-01-01"}
+
+    def test_parse_extra_options_empty_list(self):
+        """Test parsing empty options list."""
+        options = []
+
+        result = HLedger._parse_extra_options(options)
+
+        assert result == {}
+
+    def test_balance_with_extra_options(self, hledger_with_mock, mock_backend, monkeypatch):
+        """Test that extra balance options are passed to backend."""
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", "--cost --depth 5")
+
+        # Reload config to pick up env var
+        import importlib
+
+        from hledger_tui import config as config_module
+
+        importlib.reload(config_module)
+        from hledger_tui.core import service as service_module
+
+        importlib.reload(service_module)
+
+        from conftest import MockHLedgerBackend
+
+        mock_backend = MockHLedgerBackend()
+        hledger = service_module.HLedger(backend=mock_backend)
+
+        hledger.balance()
+
+        queries, kwargs = mock_backend.balance_calls[0]
+        assert kwargs["cost"] is True
+        assert kwargs["depth"] == "5"
+
+    def test_register_with_extra_options(self, hledger_with_mock, mock_backend, monkeypatch):
+        """Test that extra register options are passed to backend."""
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_REGISTER", "--related --cost")
+
+        # Reload config to pick up env var
+        import importlib
+
+        from hledger_tui import config as config_module
+
+        importlib.reload(config_module)
+        from hledger_tui.core import service as service_module
+
+        importlib.reload(service_module)
+
+        from conftest import MockHLedgerBackend
+
+        mock_backend = MockHLedgerBackend()
+        hledger = service_module.HLedger(backend=mock_backend)
+
+        hledger.register("expenses:food")
+
+        queries, kwargs = mock_backend.register_calls[0]
+        assert kwargs["related"] is True
+        assert kwargs["cost"] is True
+
+    def test_extra_options_override_defaults(self, hledger_with_mock, mock_backend, monkeypatch):
+        """Test that extra options can override default settings."""
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", "--depth 10")
+
+        # Reload config to pick up env var
+        import importlib
+
+        from hledger_tui import config as config_module
+
+        importlib.reload(config_module)
+        from hledger_tui.core import service as service_module
+
+        importlib.reload(service_module)
+
+        from conftest import MockHLedgerBackend
+
+        mock_backend = MockHLedgerBackend()
+        hledger = service_module.HLedger(backend=mock_backend)
+        hledger.depth = 2  # Set a default depth
+
+        hledger.balance()
+
+        queries, kwargs = mock_backend.balance_calls[0]
+        # Extra option should override
+        assert kwargs["depth"] == "10"
+
+    def test_assets_with_extra_options(self, hledger_with_mock, mock_backend, monkeypatch):
+        """Test that extra balance options are applied to assets method."""
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", "--cost")
+
+        # Reload config to pick up env var
+        import importlib
+
+        from hledger_tui import config as config_module
+
+        importlib.reload(config_module)
+        from hledger_tui.core import service as service_module
+
+        importlib.reload(service_module)
+
+        from conftest import MockHLedgerBackend
+
+        mock_backend = MockHLedgerBackend()
+        hledger = service_module.HLedger(backend=mock_backend)
+
+        hledger.assets()
+
+        queries, kwargs = mock_backend.balance_calls[0]
+        assert kwargs["cost"] is True
+
+    def test_balance_over_time_with_extra_options(
+        self, hledger_with_mock, mock_backend, monkeypatch
+    ):
+        """Test that extra balance options are applied to balance_over_time method."""
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", "--cost")
+
+        # Reload config to pick up env var
+        import importlib
+
+        from hledger_tui import config as config_module
+
+        importlib.reload(config_module)
+        from hledger_tui.core import service as service_module
+
+        importlib.reload(service_module)
+
+        from conftest import MockHLedgerBackend
+
+        mock_backend = MockHLedgerBackend()
+        hledger = service_module.HLedger(backend=mock_backend)
+
+        hledger.balance_over_time("expenses:food")
+
+        queries, kwargs = mock_backend.balance_calls[0]
+        assert kwargs["cost"] is True

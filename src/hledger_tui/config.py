@@ -38,6 +38,10 @@ class HLedgerConfig:
     default_depth_max: int = 4
     default_commodity: str = ""
 
+    # Extra options for HLedger commands
+    extra_balance_options: List[str] = field(default_factory=list)
+    extra_register_options: List[str] = field(default_factory=list)
+
     # Period defaults
     default_period_unit: Optional[str] = "months"
     default_subdivision: str = "weekly"
@@ -52,6 +56,8 @@ class HLedgerConfig:
             HLEDGER_TUI_ASSETS_QUERIES: Comma-separated asset queries
             HLEDGER_TUI_DEPTH: Default depth (integer)
             HLEDGER_TUI_COMMODITY: Currency exchange target (empty = auto-guess with --market)
+            HLEDGER_TUI_EXTRA_OPTIONS_BALANCE: Space-separated extra options for balance command
+            HLEDGER_TUI_EXTRA_OPTIONS_REGISTER: Space-separated extra options for register command
 
         Returns:
             HLedgerConfig instance with values from environment or defaults.
@@ -78,6 +84,16 @@ class HLedgerConfig:
 
         if commodity_env := os.getenv("HLEDGER_TUI_COMMODITY"):
             config.default_commodity = commodity_env
+
+        if extra_balance_env := os.getenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE"):
+            import shlex
+
+            config.extra_balance_options = shlex.split(extra_balance_env)
+
+        if extra_register_env := os.getenv("HLEDGER_TUI_EXTRA_OPTIONS_REGISTER"):
+            import shlex
+
+            config.extra_register_options = shlex.split(extra_register_env)
 
         return config
 

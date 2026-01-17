@@ -127,6 +127,19 @@ export HLEDGER_TUI_ASSETS_QUERIES="acct:assets,cur:€"
 hledger-tui
 ```
 
+#### Custom Conversion Options
+
+You can pass additional HLedger options using the `HLEDGER_TUI_EXTRA_OPTIONS_BALANCE` and `HLEDGER_TUI_EXTRA_OPTIONS_REGISTER` environment variables. For example, to use cost basis conversion instead of market prices:
+
+```bash
+# Use cost basis for all balance commands
+export HLEDGER_TUI_EXTRA_OPTIONS_BALANCE="--cost"
+export HLEDGER_TUI_EXTRA_OPTIONS_REGISTER="--cost"
+hledger-tui
+```
+
+These variables accept any valid HLedger command-line options and can be used to customize behavior beyond the built-in settings.
+
 
 ## ⚙️ Configuration
 
@@ -142,6 +155,8 @@ You can customize hledger-tui behavior using environment variables. All configur
 | `HLEDGER_TUI_ASSETS_QUERIES` | Comma-separated queries for asset filtering | `acct:assets, acct:liabilities, acct:budget` | `acct:assets, acct:liabilities` |
 | `HLEDGER_TUI_DEPTH` | Default depth for account hierarchy display | `2` | `3` |
 | `HLEDGER_TUI_COMMODITY` | Currency for exchange conversion (empty = use market prices) | `` (empty) | `€`, `$`, `USD` |
+| `HLEDGER_TUI_EXTRA_OPTIONS_BALANCE` | Space-separated extra options for `hledger balance` command | `` (empty) | `--cost`, `--depth 4` |
+| `HLEDGER_TUI_EXTRA_OPTIONS_REGISTER` | Space-separated extra options for `hledger register` command | `` (empty) | `--cost`, `--related` |
 
 ### Example Configuration
 

@@ -124,6 +124,56 @@ class HLedger:
         self.backend = backend or ShellHLedgerBackend()
         self._declared_commodities: Optional[List[str]] = None
 
+    @staticmethod
+    def _parse_extra_options(options: List[str]) -> dict:
+        """Parse extra command-line options into sh library kwargs format.
+
+        Converts command-line style arguments like '--cost' or '--depth 3' into
+        keyword arguments compatible with the sh library. Follows sh conventions:
+        - Replace dashes with underscores: '--no-total' becomes 'no_total'
+        - Boolean flags (no value): set to True
+        - Key-value pairs: extract value
+
+        Args:
+            options: List of command-line arguments (e.g., ['--cost', '--depth', '3'])
+
+        Returns:
+            Dictionary of keyword arguments for sh library
+
+        Examples:
+            ['--cost'] -> {'cost': True}
+            ['--depth', '3'] -> {'depth': '3'}
+            ['--no-total'] -> {'no_total': True}
+        """
+        kwargs = {}
+        i = 0
+        while i < len(options):
+            arg = options[i]
+            if arg.startswith("--"):
+                # Remove '--' prefix and convert dashes to underscores
+                key = arg[2:].replace("-", "_")
+                # Check if next item is a value (doesn't start with --)
+                if i + 1 < len(options) and not options[i + 1].startswith("--"):
+                    kwargs[key] = options[i + 1]
+                    i += 2
+                else:
+                    # Boolean flag
+                    kwargs[key] = True
+                    i += 1
+            elif arg.startswith("-"):
+                # Single dash short option (e.g., -V)
+                key = arg[1:]
+                if i + 1 < len(options) and not options[i + 1].startswith("-"):
+                    kwargs[key] = options[i + 1]
+                    i += 2
+                else:
+                    kwargs[key] = True
+                    i += 1
+            else:
+                # Skip non-option arguments
+                i += 1
+        return kwargs
+
     def _get_currency_conversion_kwargs(self) -> dict:
         """Get currency conversion kwargs based on HLEDGER_TUI_COMMODITY setting.
 
@@ -184,6 +234,10 @@ class HLedger:
         if self.period.value is not None:
             hledger_args["period"] = self.period.value
 
+        # Apply extra options (these can override defaults per "last wins" behavior)
+        extra_kwargs = self._parse_extra_options(config.extra_balance_options)
+        hledger_args.update(extra_kwargs)
+
         raw_balances = self.backend.balance(queries or self.queries, **hledger_args, **kwargs)
         csv_reader = csv.reader(StringIO(raw_balances))
         # Process the header row
@@ -235,6 +289,10 @@ class HLedger:
         if self.period.value is not None:
             hledger_args["period"] = self.period.value
 
+        # Apply extra options (these can override defaults per "last wins" behavior)
+        extra_kwargs = self._parse_extra_options(config.extra_balance_options)
+        hledger_args.update(extra_kwargs)
+
         raw_balances = self.backend.balance(queries or self.queries, **hledger_args, **kwargs)
         csv_reader = csv.reader(StringIO(raw_balances))
         next(csv_reader)  # Skip the header row
@@ -253,13 +311,21 @@ class HLedger:
             List of CategoricalBalance objects for the tag filter.
         """
         balances: List[CategoricalBalance] = []
+        # Build hledger command arguments
+        hledger_args = {
+            "depth": self.depth,
+            "no_total": True,
+            "output_format": "csv",
+            "_tty_out": False,
+            **self._get_currency_conversion_kwargs(),
+        }
+        # Apply extra options (these can override defaults per "last wins" behavior)
+        extra_kwargs = self._parse_extra_options(config.extra_balance_options)
+        hledger_args.update(extra_kwargs)
+
         raw_balances = self.backend.balance(
             [*self.DEFAULT_HLEDGER_TAG_QUERIES, tag],
-            depth=self.depth,
-            no_total=True,
-            output_format="csv",
-            _tty_out=False,
-            **self._get_currency_conversion_kwargs(),
+            **hledger_args,
             **kwargs,
         )
         csv_reader = csv.reader(StringIO(raw_balances))
@@ -306,6 +372,10 @@ class HLedger:
         if self.period.value is not None:
             hledger_args["period"] = self.period.value
 
+        # Apply extra options (these can override defaults per "last wins" behavior)
+        extra_kwargs = self._parse_extra_options(config.extra_balance_options)
+        hledger_args.update(extra_kwargs)
+
         raw_balances = self.backend.balance([account], **hledger_args, **kwargs)
         csv_reader = csv.reader(StringIO(raw_balances))
         header_row: bool = True
@@ -330,7 +400,6 @@ class HLedger:
         """Calculate maximum account depth from current query results."""
         accounts = self.backend.accounts(self.queries).split("\n")
         max_depth = max(len(account.split(":")) for account in accounts) + 1
-        print(max_depth)
         return max_depth
 
     @staticmethod
@@ -416,6 +485,10 @@ class HLedger:
             # Convert ISO week format (YYYY-WNN) to date range if needed
             period_to_use = self._convert_week_period(period_to_use)
             hledger_args["period"] = period_to_use
+
+        # Apply extra options (these can override defaults per "last wins" behavior)
+        extra_kwargs = self._parse_extra_options(config.extra_register_options)
+        hledger_args.update(extra_kwargs)
 
         # Build query list
         queries = [account]

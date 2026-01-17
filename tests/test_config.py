@@ -79,3 +79,39 @@ class TestHLedgerConfigFromEnv:
         # Lists should be separate instances
         config1.default_expenses_queries.append("test")
         assert len(config1.default_expenses_queries) != len(config2.default_expenses_queries)
+
+    def test_config_from_env_with_extra_balance_options(self, monkeypatch):
+        """Test that from_env() loads extra balance options from environment variables."""
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", "--cost --depth 5")
+
+        config = HLedgerConfig.from_env()
+
+        assert config.extra_balance_options == ["--cost", "--depth", "5"]
+
+    def test_config_from_env_with_extra_register_options(self, monkeypatch):
+        """Test that from_env() loads extra register options from environment variables."""
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_REGISTER", "--related --cost")
+
+        config = HLedgerConfig.from_env()
+
+        assert config.extra_register_options == ["--related", "--cost"]
+
+    def test_config_from_env_with_quoted_extra_options(self, monkeypatch):
+        """Test that extra options handle quoted strings with spaces correctly."""
+        monkeypatch.setenv(
+            "HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", '--cost --format "%(account) %(amount)"'
+        )
+
+        config = HLedgerConfig.from_env()
+
+        assert config.extra_balance_options == ["--cost", "--format", "%(account) %(amount)"]
+
+    def test_config_from_env_extra_options_defaults_to_empty(self, monkeypatch):
+        """Test that extra options default to empty list when not set."""
+        monkeypatch.delenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", raising=False)
+        monkeypatch.delenv("HLEDGER_TUI_EXTRA_OPTIONS_REGISTER", raising=False)
+
+        config = HLedgerConfig.from_env()
+
+        assert config.extra_balance_options == []
+        assert config.extra_register_options == []
