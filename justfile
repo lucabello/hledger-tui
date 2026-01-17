@@ -38,7 +38,7 @@ format:
 # Run tests
 [group("dev")]
 test:
-    uv run pytest
+    uv run pytest --cov=src/hledger_tui --cov-report=term-missing
 
 # Build the project
 [group("build")]
