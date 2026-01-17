@@ -12,6 +12,7 @@ from textual.widgets import (
     TabPane,
 )
 
+from hledger_tui.config import config
 from hledger_tui.ui.tabs.assets import HLedgerAssetsTab
 from hledger_tui.ui.tabs.balance import HLedgerBalanceTab
 from hledger_tui.ui.tabs.statistics import HLedgerStatisticsTab
@@ -90,6 +91,9 @@ def main(
             typer.echo(f"Error: Ledger file not found: {file_path}", err=True)
             raise typer.Exit(1)
         os.environ["LEDGER_FILE"] = str(file_path)
+    elif config.ledger_file:
+        # Use ledger_file from config if --file flag not provided
+        os.environ["LEDGER_FILE"] = config.ledger_file
 
     # Verify LEDGER_FILE is set
     if not os.getenv("LEDGER_FILE"):

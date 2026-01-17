@@ -3,81 +3,93 @@
 from dataclasses import dataclass, field
 from typing import Final, List, Optional
 
+from dataconfy import ConfigManager
+
+
+@dataclass
+class Queries:
+    """Query filters for different tabs."""
+
+    assets: List[str] = field(
+        default_factory=lambda: [
+            "acct:assets",
+        ]
+    )
+    expenses: List[str] = field(
+        default_factory=lambda: [
+            "acct:expenses",
+        ]
+    )
+    tags: List[str] = field(
+        default_factory=lambda: [
+            "acct:expenses",
+        ]
+    )
+
+
+@dataclass
+class Period:
+    """Period and subdivision settings."""
+
+    unit: Optional[str] = "months"
+    subdivision: str = "weekly"
+
+
+@dataclass
+class ExtraOptions:
+    """Extra command-line options for hledger commands."""
+
+    balance: List[str] = field(default_factory=list)
+    register: List[str] = field(default_factory=list)
+
 
 @dataclass
 class HLedgerConfig:
     """Configuration settings for HLedger TUI with default queries and display options."""
 
-    # Query defaults
-    default_expenses_queries: List[str] = field(
-        default_factory=lambda: [
-            "acct:expenses",
-            "not:acct:financial",
-            "not:acct:home:rent",
-            "not:acct:home:utilities",
-        ]
-    )
-
-    default_tag_queries: List[str] = field(
-        default_factory=lambda: [
-            "acct:expenses",
-        ]
-    )
-
-    default_assets_queries: List[str] = field(
-        default_factory=lambda: [
-            "acct:assets",
-            "acct:liabilities",
-            "acct:budget",
-        ]
-    )
-
-    # Display defaults
-    default_depth: int = 2
-    default_depth_min: int = 1
-    default_depth_max: int = 4
-    default_commodity: str = ""
-
-    # Period defaults
-    default_period_unit: Optional[str] = "months"
-    default_subdivision: str = "weekly"
+    ledger_file: Optional[str] = field(default=None, metadata={"env": "LEDGER_FILE"})
+    queries: Queries = field(default_factory=Queries)
+    depth: int = 2
+    commodity: Optional[str] = None
+    period: Period = field(default_factory=Period)
+    extra_options: ExtraOptions = field(default_factory=ExtraOptions)
 
     @classmethod
     def from_env(cls) -> "HLedgerConfig":
-        """Create configuration from environment variables, falling back to defaults.
+        """Create configuration from environment variables and config file.
+
+        Configuration priority (highest to lowest):
+            1. Environment variables (e.g., HLEDGER_TUI_DEPTH)
+            2. Config file (~/.config/hledger-tui/config.yaml)
+            3. Default values
 
         Environment variables:
-            HLEDGER_TUI_EXPENSE_QUERIES: Comma-separated expense queries
-            HLEDGER_TUI_TAG_QUERIES: Comma-separated tag queries
-            HLEDGER_TUI_ASSETS_QUERIES: Comma-separated asset queries
+            HLEDGER_TUI_QUERIES_EXPENSES: JSON array of expense queries
+            HLEDGER_TUI_QUERIES_TAGS: JSON array of tag queries
+            HLEDGER_TUI_QUERIES_ASSETS: JSON array of asset queries
             HLEDGER_TUI_DEPTH: Default depth (integer)
             HLEDGER_TUI_COMMODITY: Currency exchange target (empty = auto-guess with --market)
+            HLEDGER_TUI_PERIOD_UNIT: Default time period unit (weeks, months, quarters, years)
+            HLEDGER_TUI_PERIOD_SUBDIVISION: Default subdivision for charts (daily, weekly, monthly, yearly)
+            HLEDGER_TUI_EXTRA_OPTIONS_BALANCE: JSON array of extra options for balance command
+            HLEDGER_TUI_EXTRA_OPTIONS_REGISTER: JSON array of extra options for register command
+
+        Config file location:
+            Linux: ~/.config/hledger-tui/config.yaml
+            macOS: ~/Library/Application Support/hledger-tui/config.yaml
+            Windows: %LOCALAPPDATA%\\hledger-tui\\config.yaml
 
         Returns:
-            HLedgerConfig instance with values from environment or defaults.
+            HLedgerConfig instance with values from environment, config file, or defaults.
         """
-        import os
+        # Create config manager with environment variable support enabled
+        config_manager = ConfigManager(
+            app_name="hledger-tui",
+            use_env_vars=True,
+        )
 
-        config = cls()
-
-        # Override with environment variables if present
-        if expenses_queries_env := os.getenv("HLEDGER_TUI_EXPENSE_QUERIES"):
-            config.default_expenses_queries = [q.strip() for q in expenses_queries_env.split(",")]
-
-        if tag_queries_env := os.getenv("HLEDGER_TUI_TAG_QUERIES"):
-            config.default_tag_queries = [q.strip() for q in tag_queries_env.split(",")]
-
-        if assets_queries_env := os.getenv("HLEDGER_TUI_ASSETS_QUERIES"):
-            config.default_assets_queries = [q.strip() for q in assets_queries_env.split(",")]
-
-        if depth_env := os.getenv("HLEDGER_TUI_DEPTH"):
-            try:
-                config.default_depth = int(depth_env)
-            except ValueError:
-                pass
-
-        if commodity_env := os.getenv("HLEDGER_TUI_COMMODITY"):
-            config.default_commodity = commodity_env
+        # Load config from file with env var overrides, or use defaults if file doesn't exist
+        config = config_manager.load(cls)
 
         return config
 

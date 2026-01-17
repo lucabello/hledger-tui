@@ -94,6 +94,75 @@ uvx hledger-tui
 
 That's it! Use the keyboard shortcuts shown in the footer to navigate and explore your financial data.
 
+## ⚙️ Configuration
+
+hledger-tui can be configured using a YAML config file or environment variables. The config file is the recommended approach for most users, while environment variables are useful for temporary overrides or containerized deployments.
+
+When the same setting is specified in multiple places, they are applied in this priority order (highest to lowest):
+
+1. **Environment variables** (e.g., `HLEDGER_TUI_DEPTH=3`)
+2. **Config file** (`~/.config/hledger-tui/config.yaml`)
+3. **Default values** (built into the application)
+
+### Configuration File (Recommended)
+
+Create a config file at the platform-specific location:
+
+- **Linux**: `~/.config/hledger-tui/config.yaml`
+- **macOS**: `~/Library/Application Support/hledger-tui/config.yaml`
+- **Windows**: `%LOCALAPPDATA%\hledger-tui\config.yaml`
+
+**Example config.yaml:**
+
+```yaml
+# Path to hledger file:oOptional if LEDGER_FILE is set, or when using `-f`/`--file`
+ledger_file: /path/to/hledger.journal
+# Query defaults for filtering results in various tabs
+queries:
+  assets:
+    - acct:assets
+  expenses:
+    - acct:expenses
+  tags:
+    - acct:expenses
+
+# Display settings
+depth: 2
+commodity: ""  # Empty = use market prices; set to "$" or "€" to convert
+
+# Period settings
+period:
+  unit: months          # Options: weeks, months, quarters, years
+  subdivision: weekly   # Options: daily, weekly, monthly, yearly
+
+# Extra options for HLedger commands
+extra_options:
+  balance: []   # Example: ["--cost", "--depth", "4"]
+  register: []  # Example: ["--related", "--cost"]
+```
+
+### Environment Variables
+
+You can override any config file setting using environment variables. This is especially useful for CI/CD, containers, or temporary changes.
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `LEDGER_FILE` | Path to your hledger journal file (can be overridden with `-f` flag) | None | `/path/to/journal.ledger` |
+| `HLEDGER_TUI_QUERIES_ASSETS` | JSON array of asset query filters | `["acct:assets", "acct:liabilities", ...]` | `'["acct:assets", "acct:liabilities"]'` |
+| `HLEDGER_TUI_QUERIES_EXPENSES` | JSON array of expense query filters | `["acct:expenses", "not:acct:financial", ...]` | `'["acct:expenses", "not:tag:excluded"]'` |
+| `HLEDGER_TUI_QUERIES_TAGS` | JSON array of tag query filters | `["acct:expenses"]` | `'["acct:expenses", "acct:income"]'` |
+| `HLEDGER_TUI_DEPTH` | Default depth for account hierarchy display | `2` | `3` |
+| `HLEDGER_TUI_COMMODITY` | Currency for exchange conversion (empty = use market prices) | `` (empty) | `€`, `$`, `USD` |
+| `HLEDGER_TUI_EXTRA_OPTIONS_BALANCE` | JSON array of extra options for `hledger balance` command | `[]` | `'["--cost", "--depth", "4"]'` |
+| `HLEDGER_TUI_EXTRA_OPTIONS_REGISTER` | JSON array of extra options for `hledger register` command | `[]` | `'["--cost", "--related"]'` |
+
+**Note:** List-type environment variables must be in JSON array format. Use single quotes to wrap the JSON string in shell:
+
+```bash
+export HLEDGER_TUI_QUERIES_EXPENSES='["acct:expenses", "not:acct:financial"]'
+```
+
+
 ### 💱 Multi-Currency Support
 
 hledger-tui supports journals with multiple currencies, but it can only display one at a time. **Terminal plots require a single currency**, because trying to display multiple at once would make bar and line charts in the TUI cluttered, or would make lines overlap. 
@@ -122,43 +191,24 @@ Add currency filters to your queries to view only transactions related to a spec
 
 ```bash
 # Show only euro transactions
-export HLEDGER_TUI_EXPENSE_QUERIES="acct:expenses,cur:€"
-export HLEDGER_TUI_ASSETS_QUERIES="acct:assets,cur:€"
+export HLEDGER_TUI_QUERIES_EXPENSES="acct:expenses,cur:€"
+export HLEDGER_TUI_QUERIES_ASSETS="acct:assets,cur:€"
+export HLEDGER_TUI_COMMODITY="€"
 hledger-tui
 ```
 
+#### Custom Conversion Options
 
-## ⚙️ Configuration
-
-You can customize hledger-tui behavior using environment variables. All configuration options are optional and fall back to sensible defaults.
-
-### Environment Variables
-
-| Variable | Description | Default | Example |
-|----------|-------------|---------|---------|
-| `LEDGER_FILE` | Path to your hledger journal file (can be overridden with `-f` flag) | None | `/path/to/journal.ledger` |
-| `HLEDGER_TUI_EXPENSE_QUERIES` | Comma-separated queries for expense filtering | `acct:expenses, not:acct:financial, not:acct:home:rent, not:acct:home:utilities` | `acct:expenses, not:tag:excluded` |
-| `HLEDGER_TUI_TAG_QUERIES` | Comma-separated queries for tag filtering | `acct:expenses` | `acct:expenses, acct:income` |
-| `HLEDGER_TUI_ASSETS_QUERIES` | Comma-separated queries for asset filtering | `acct:assets, acct:liabilities, acct:budget` | `acct:assets, acct:liabilities` |
-| `HLEDGER_TUI_DEPTH` | Default depth for account hierarchy display | `2` | `3` |
-| `HLEDGER_TUI_COMMODITY` | Currency for exchange conversion (empty = use market prices) | `` (empty) | `€`, `$`, `USD` |
-
-### Example Configuration
+You can pass additional HLedger options using the `HLEDGER_TUI_EXTRA_OPTIONS_BALANCE` and `HLEDGER_TUI_EXTRA_OPTIONS_REGISTER` environment variables. For example, to use cost basis conversion instead of market prices:
 
 ```bash
-# Basic setup with required variable
-export LEDGER_FILE=/path/to/journal.ledger
-
-# Customize expense tracking
-export HLEDGER_TUI_EXPENSE_QUERIES="acct:expenses, not:acct:mortgage"
-
-# Change default display settings
-export HLEDGER_TUI_DEPTH=3
-export HLEDGER_TUI_COMMODITY="$"
-
-# Run the app
+# Use cost basis for all balance commands
+export HLEDGER_TUI_EXTRA_OPTIONS_BALANCE='["--cost"]'
+export HLEDGER_TUI_EXTRA_OPTIONS_REGISTER='["--cost"]'
 hledger-tui
 ```
+
+These variables accept any valid HLedger command-line options and can be used to customize behavior beyond the built-in settings.
 
 ## 🔧 Development
 
