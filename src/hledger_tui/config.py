@@ -47,6 +47,7 @@ class ExtraOptions:
 class HLedgerConfig:
     """Configuration settings for HLedger TUI with default queries and display options."""
 
+    ledger_file: Optional[str] = field(default=None, metadata={"env": "LEDGER_FILE"})
     queries: Queries = field(default_factory=Queries)
     depth: int = 2
     commodity: Optional[str] = None

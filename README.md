@@ -94,58 +94,9 @@ uvx hledger-tui
 
 That's it! Use the keyboard shortcuts shown in the footer to navigate and explore your financial data.
 
-### 💱 Multi-Currency Support
-
-hledger-tui supports journals with multiple currencies, but it can only display one at a time. **Terminal plots require a single currency**, because trying to display multiple at once would make bar and line charts in the TUI cluttered, or would make lines overlap. 
-
-There are three main strategies to handle multi-currency journals.
-
-#### Automatic Conversion (Default)
-
-When `HLEDGER_TUI_COMMODITY` is **not set** (default), hledger-tui uses the `--market` flag from HLedger to convert all amounts to one currency, based on market prices declared in your journal:
-
-#### Convert to a Specific Currency
-
-Set `HLEDGER_TUI_COMMODITY` to convert all amounts to a specific currency using the `--exchange` HLedger flag.
-
-```bash
-# Convert everything to euros
-export HLEDGER_TUI_COMMODITY="€"
-hledger-tui
-```
-
-The currency must exist in `hledger commodities --declared` or an error will be raised.
-
-#### Filter Transactions by Currency
-
-Add currency filters to your queries to view only transactions related to a specific commodity:
-
-```bash
-# Show only euro transactions
-export HLEDGER_TUI_QUERIES_EXPENSES="acct:expenses,cur:€"
-export HLEDGER_TUI_QUERIES_ASSETS="acct:assets,cur:€"
-hledger-tui
-```
-
-#### Custom Conversion Options
-
-You can pass additional HLedger options using the `HLEDGER_TUI_EXTRA_OPTIONS_BALANCE` and `HLEDGER_TUI_EXTRA_OPTIONS_REGISTER` environment variables. For example, to use cost basis conversion instead of market prices:
-
-```bash
-# Use cost basis for all balance commands
-export HLEDGER_TUI_EXTRA_OPTIONS_BALANCE="--cost"
-export HLEDGER_TUI_EXTRA_OPTIONS_REGISTER="--cost"
-hledger-tui
-```
-
-These variables accept any valid HLedger command-line options and can be used to customize behavior beyond the built-in settings.
-
-
 ## ⚙️ Configuration
 
 hledger-tui can be configured using a YAML config file or environment variables. The config file is the recommended approach for most users, while environment variables are useful for temporary overrides or containerized deployments.
-
-### Configuration Priority
 
 When the same setting is specified in multiple places, they are applied in this priority order (highest to lowest):
 
@@ -153,7 +104,7 @@ When the same setting is specified in multiple places, they are applied in this 
 2. **Config file** (`~/.config/hledger-tui/config.yaml`)
 3. **Default values** (built into the application)
 
-### Config File (Recommended)
+### Configuration File (Recommended)
 
 Create a config file at the platform-specific location:
 
@@ -164,6 +115,7 @@ Create a config file at the platform-specific location:
 **Example config.yaml:**
 
 ```yaml
+ledger_file: /path/to/hledger.journal  # Optional if LEDGER_FILE is set, or when using `-f`/`--file`
 # Query defaults for filtering results in various tabs
 queries:
   assets:
@@ -214,55 +166,53 @@ You can override any config file setting using environment variables. This is es
 export HLEDGER_TUI_QUERIES_EXPENSES='["acct:expenses", "not:acct:financial"]'
 ```
 
-### Example: Using Config File
 
-Create `~/.config/hledger-tui/config.yaml`:
+### 💱 Multi-Currency Support
 
-```yaml
-# Custom expense filters
-queries:
-  expenses:
-    - acct:expenses
-    - not:acct:mortgage
+hledger-tui supports journals with multiple currencies, but it can only display one at a time. **Terminal plots require a single currency**, because trying to display multiple at once would make bar and line charts in the TUI cluttered, or would make lines overlap. 
 
-# Display 3 levels deep by default
-depth: 3
+There are three main strategies to handle multi-currency journals.
 
-# Convert all amounts to dollars
-commodity: "$"
-```
+#### Automatic Conversion (Default)
 
-### Example: Using Environment Variables
+When `HLEDGER_TUI_COMMODITY` is **not set** (default), hledger-tui uses the `--market` flag from HLedger to convert all amounts to one currency, based on market prices declared in your journal:
+
+#### Convert to a Specific Currency
+
+Set `HLEDGER_TUI_COMMODITY` to convert all amounts to a specific currency using the `--exchange` HLedger flag.
 
 ```bash
-# Basic setup with required variable
-export LEDGER_FILE=/path/to/journal.ledger
-
-# Override config file settings temporarily
-export HLEDGER_TUI_DEPTH=3
+# Convert everything to euros
 export HLEDGER_TUI_COMMODITY="€"
-export HLEDGER_TUI_QUERIES_EXPENSES='["acct:expenses", "not:acct:mortgage"]'
-
-# Run the app
 hledger-tui
 ```
 
-### Example: Mixed Approach
+The currency must exist in `hledger commodities --declared` or an error will be raised.
 
-You can combine both approaches - use the config file for your standard settings, and environment variables for temporary overrides:
+#### Filter Transactions by Currency
+
+Add currency filters to your queries to view only transactions related to a specific commodity:
 
 ```bash
-# Config file has: depth: 2, commodity: "$"
-# Override just the depth for this session:
-export HLEDGER_TUI_DEPTH=4
+# Show only euro transactions
+export HLEDGER_TUI_QUERIES_EXPENSES="acct:expenses,cur:€"
+export HLEDGER_TUI_QUERIES_ASSETS="acct:assets,cur:€"
+export HLEDGER_TUI_COMMODITY="€"
+hledger-tui
+```
 
-# The app will use:
-# - depth: 4 (from environment variable)
-# - commodity: "$" (from config file)
+#### Custom Conversion Options
+
+You can pass additional HLedger options using the `HLEDGER_TUI_EXTRA_OPTIONS_BALANCE` and `HLEDGER_TUI_EXTRA_OPTIONS_REGISTER` environment variables. For example, to use cost basis conversion instead of market prices:
+
+```bash
+# Use cost basis for all balance commands
+export HLEDGER_TUI_EXTRA_OPTIONS_BALANCE='["--cost"]'
+export HLEDGER_TUI_EXTRA_OPTIONS_REGISTER='["--cost"]'
 hledger-tui
 ```
-hledger-tui
-```
+
+These variables accept any valid HLedger command-line options and can be used to customize behavior beyond the built-in settings.
 
 ## 🔧 Development
 
