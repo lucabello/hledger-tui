@@ -57,6 +57,13 @@ clean:
     # Remove coverage reports
     rm -f .coverage coverage.xml
 
+# Bump the version in pyproject.toml
+[group("release")]
+[arg("level", pattern="^(major|minor|patch)$")]
+bump level:
+    #!/usr/bin/env bash
+    uv version --bump={{level}}
+
 # Create a GitHub release (which will trigger a PyPi release)
 [group("release")]
 release:
