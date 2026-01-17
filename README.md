@@ -94,6 +94,40 @@ uvx hledger-tui
 
 That's it! Use the keyboard shortcuts shown in the footer to navigate and explore your financial data.
 
+### 💱 Multi-Currency Support
+
+hledger-tui supports journals with multiple currencies, but it can only display one at a time. **Terminal plots require a single currency**, because trying to display multiple at once would make bar and line charts in the TUI cluttered, or would make lines overlap. 
+
+There are three main strategies to handle multi-currency journals.
+
+#### Automatic Conversion (Default)
+
+When `HLEDGER_TUI_COMMODITY` is **not set** (default), hledger-tui uses the `--market` flag from HLedger to convert all amounts to one currency, based on market prices declared in your journal:
+
+#### Convert to a Specific Currency
+
+Set `HLEDGER_TUI_COMMODITY` to convert all amounts to a specific currency using the `--exchange` HLedger flag.
+
+```bash
+# Convert everything to euros
+export HLEDGER_TUI_COMMODITY="€"
+hledger-tui
+```
+
+The currency must exist in `hledger commodities --declared` or an error will be raised.
+
+#### Filter Transactions by Currency
+
+Add currency filters to your queries to view only transactions related to a specific commodity:
+
+```bash
+# Show only euro transactions
+export HLEDGER_TUI_EXPENSE_QUERIES="acct:expenses,cur:€"
+export HLEDGER_TUI_ASSETS_QUERIES="acct:assets,cur:€"
+hledger-tui
+```
+
+
 ## ⚙️ Configuration
 
 You can customize hledger-tui behavior using environment variables. All configuration options are optional and fall back to sensible defaults.
@@ -107,7 +141,7 @@ You can customize hledger-tui behavior using environment variables. All configur
 | `HLEDGER_TUI_TAG_QUERIES` | Comma-separated queries for tag filtering | `acct:expenses` | `acct:expenses, acct:income` |
 | `HLEDGER_TUI_ASSETS_QUERIES` | Comma-separated queries for asset filtering | `acct:assets, acct:liabilities, acct:budget` | `acct:assets, acct:liabilities` |
 | `HLEDGER_TUI_DEPTH` | Default depth for account hierarchy display | `2` | `3` |
-| `HLEDGER_TUI_COMMODITY` | Default commodity symbol for display | `€` | `$` |
+| `HLEDGER_TUI_COMMODITY` | Currency for exchange conversion (empty = use market prices) | `` (empty) | `€`, `$`, `USD` |
 
 ### Example Configuration
 

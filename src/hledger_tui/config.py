@@ -36,7 +36,7 @@ class HLedgerConfig:
     default_depth: int = 2
     default_depth_min: int = 1
     default_depth_max: int = 4
-    default_commodity: str = "€"
+    default_commodity: str = ""
 
     # Period defaults
     default_period_unit: Optional[str] = "months"
@@ -51,7 +51,7 @@ class HLedgerConfig:
             HLEDGER_TUI_TAG_QUERIES: Comma-separated tag queries
             HLEDGER_TUI_ASSETS_QUERIES: Comma-separated asset queries
             HLEDGER_TUI_DEPTH: Default depth (integer)
-            HLEDGER_TUI_COMMODITY: Default commodity symbol
+            HLEDGER_TUI_COMMODITY: Currency exchange target (empty = auto-guess with --market)
 
         Returns:
             HLedgerConfig instance with values from environment or defaults.

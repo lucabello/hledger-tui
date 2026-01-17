@@ -53,8 +53,8 @@ assets:checking"""
 category
 client"""
 
-    def commodities(self) -> str:
-        self.commodities_calls.append(True)
+    def commodities(self, **kwargs) -> str:
+        self.commodities_calls.append(kwargs)
         return """€
 $
 £"""

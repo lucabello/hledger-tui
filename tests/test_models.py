@@ -19,11 +19,35 @@ class TestCategoricalBalance:
         assert balance.commodity == "€"
         assert balance.balance_float == 150.00
 
-    def test_balance_zero_adds_default_commodity(self):
-        """Test that zero balance gets default commodity."""
+    def test_balance_zero_adds_default_commodity(self, monkeypatch):
+        """Test that zero balance gets default commodity when commodity is set."""
+        monkeypatch.setenv("HLEDGER_TUI_COMMODITY", "€")
+        from hledger_tui.config import HLedgerConfig
+        from hledger_tui.core.models import CategoricalBalance
+
+        # Force reload to get new config
+        config = HLedgerConfig.from_env()
+        # Need to update the class variable
+        CategoricalBalance.DEFAULT_COMMODITY = config.default_commodity
+
         balance = CategoricalBalance("expenses:food", "0")
         assert balance.balance == "€ 0"
         assert balance.commodity == "€"
+        assert balance.balance_float == 0.0
+
+    def test_balance_zero_with_empty_commodity(self, monkeypatch):
+        """Test that zero balance remains '0' when commodity is empty."""
+        monkeypatch.setenv("HLEDGER_TUI_COMMODITY", "")
+        from hledger_tui.config import HLedgerConfig
+        from hledger_tui.core.models import CategoricalBalance
+
+        # Force reload to get new config
+        config = HLedgerConfig.from_env()
+        CategoricalBalance.DEFAULT_COMMODITY = config.default_commodity
+
+        balance = CategoricalBalance("expenses:food", "0")
+        assert balance.balance == "0"
+        assert balance.commodity == ""
         assert balance.balance_float == 0.0
 
     def test_balance_negative_value(self):
