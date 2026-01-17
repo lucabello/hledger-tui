@@ -120,13 +120,8 @@ ledger_file: /path/to/hledger.journal  # Optional if LEDGER_FILE is set, or when
 queries:
   assets:
     - acct:assets
-    - acct:liabilities
-    - acct:budget
   expenses:
     - acct:expenses
-    - not:acct:financial
-    - not:acct:home:rent
-    - not:acct:home:utilities
   tags:
     - acct:expenses
 
