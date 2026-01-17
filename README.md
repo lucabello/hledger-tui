@@ -115,7 +115,8 @@ Create a config file at the platform-specific location:
 **Example config.yaml:**
 
 ```yaml
-ledger_file: /path/to/hledger.journal  # Optional if LEDGER_FILE is set, or when using `-f`/`--file`
+# Path to hledger file:oOptional if LEDGER_FILE is set, or when using `-f`/`--file`
+ledger_file: /path/to/hledger.journal
 # Query defaults for filtering results in various tabs
 queries:
   assets:
