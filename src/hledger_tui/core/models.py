@@ -18,7 +18,7 @@ class CategoricalBalance:
 
     @property
     def balance(self) -> str:
-        if self._balance == "0":
+        if self._balance == "0" and self.DEFAULT_COMMODITY:
             return f"{self.DEFAULT_COMMODITY} 0"
         return self._balance
 

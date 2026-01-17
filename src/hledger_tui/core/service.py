@@ -56,7 +56,7 @@ class HLedgerBackend(ABC):
         pass
 
     @abstractmethod
-    def commodities(self) -> str:
+    def commodities(self, **kwargs) -> str:
         """Execute 'hledger commodities' and return raw output."""
         pass
 
@@ -82,8 +82,8 @@ class ShellHLedgerBackend(HLedgerBackend):
     def tags(self, **kwargs) -> str:
         return sh.hledger.tags(**kwargs)  # pyright: ignore
 
-    def commodities(self) -> str:
-        return sh.hledger.commodities(_tty_out=False).strip()  # pyright: ignore
+    def commodities(self, **kwargs) -> str:
+        return sh.hledger.commodities(_tty_out=False, **kwargs).strip()  # pyright: ignore
 
 
 class HLedger:
@@ -122,6 +122,37 @@ class HLedger:
         self.depth = self.DEFAULT_DEPTH
         self.period = HLedgerPeriod()
         self.backend = backend or ShellHLedgerBackend()
+        self._declared_commodities: Optional[List[str]] = None
+
+    def _get_currency_conversion_kwargs(self) -> dict:
+        """Get currency conversion kwargs based on HLEDGER_TUI_COMMODITY setting.
+
+        Returns:
+            Dictionary with either 'market': True (if commodity empty)
+            or 'exchange': commodity_value (if commodity set and valid)
+
+        Raises:
+            ValueError: If configured commodity is not declared in journal
+        """
+        commodity = config.default_commodity
+        if not commodity:
+            # Use market conversion when no commodity specified
+            return {"market": True}
+
+        # Validate commodity is declared in journal
+        if self._declared_commodities is None:
+            raw_commodities = self.backend.commodities(declared=True)
+            self._declared_commodities = [
+                c.strip() for c in raw_commodities.split("\n") if c.strip()
+            ]
+
+        if commodity not in self._declared_commodities:
+            raise ValueError(
+                f"Commodity '{commodity}' not declared in journal. "
+                f"Available commodities: {', '.join(self._declared_commodities)}"
+            )
+
+        return {"exchange": commodity}
 
     def assets(
         self, queries: Optional[List[str]] = None, **kwargs
@@ -139,7 +170,6 @@ class HLedger:
         hledger_args = {
             "depth": self.depth,
             "no_total": True,
-            "market": True,  # Unify to one currency for simplicity
             "historical": True,
             "output_format": "csv",
             "daily": self.period.subdivision == "daily",
@@ -148,6 +178,7 @@ class HLedger:
             "quarterly": self.period.subdivision == "quarterly",
             "yearly": self.period.subdivision == "yearly",
             "_tty_out": False,
+            **self._get_currency_conversion_kwargs(),
         }
         # Only add period if it's not None (all time)
         if self.period.value is not None:
@@ -196,9 +227,9 @@ class HLedger:
         hledger_args = {
             "depth": self.depth,
             "no_total": True,
-            "market": True,  # Unify to one currency for simplicity
             "output_format": "csv",
             "_tty_out": False,
+            **self._get_currency_conversion_kwargs(),
         }
         # Only add period if it's not None (all time)
         if self.period.value is not None:
@@ -226,9 +257,9 @@ class HLedger:
             [*self.DEFAULT_HLEDGER_TAG_QUERIES, tag],
             depth=self.depth,
             no_total=True,
-            market=True,  # Unify to one currency for simplicity
             output_format="csv",
             _tty_out=False,
+            **self._get_currency_conversion_kwargs(),
             **kwargs,
         )
         csv_reader = csv.reader(StringIO(raw_balances))
@@ -261,7 +292,6 @@ class HLedger:
         hledger_args = {
             "depth": self.depth,
             "no_total": True,
-            "market": True,  # Unify to one currency for simplicity
             "historical": historical,
             "output_format": "csv",
             "daily": self.period.subdivision == "daily",
@@ -270,6 +300,7 @@ class HLedger:
             "quarterly": self.period.subdivision == "quarterly",
             "yearly": self.period.subdivision == "yearly",
             "_tty_out": False,
+            **self._get_currency_conversion_kwargs(),
         }
         # Only add period if it's not None (all time)
         if self.period.value is not None:
@@ -339,10 +370,18 @@ class HLedger:
         return [a for a in raw_accounts.split("\n") if a]
 
     @staticmethod
-    def commodities() -> List[str]:
-        """Get list of commodities/currencies used in journal."""
+    def commodities(declared: bool = False) -> List[str]:
+        """Get list of commodities/currencies used in journal.
+
+        Args:
+            declared: If True, only show commodities declared with 'commodity' directive
+
+        Returns:
+            List of commodity symbols/codes
+        """
         backend = ShellHLedgerBackend()
-        raw_commodities: str = backend.commodities()
+        kwargs = {"declared": True} if declared else {}
+        raw_commodities: str = backend.commodities(**kwargs)
         return [c for c in raw_commodities.split("\n") if c]
 
     def register(
@@ -363,8 +402,8 @@ class HLedger:
         # Build hledger command arguments
         hledger_args = {
             "_tty_out": False,
-            "market": True,  # Unify to one currency for simplicity
             "output_format": "csv",
+            **self._get_currency_conversion_kwargs(),
         }
         # Use provided period or fallback to self.period
         # period="" means explicitly no period filter

@@ -239,3 +239,188 @@ class TestHLedgerParseRegisterCSV:
         transactions = HLedger._parse_register_csv(csv_data)
 
         assert len(transactions) == 0
+
+
+class TestHLedgerCurrencyConversion:
+    """Test currency conversion behavior with HLEDGER_TUI_COMMODITY."""
+
+    def test_empty_commodity_uses_market_conversion(self, monkeypatch):
+        """Test that empty commodity uses --market flag."""
+        monkeypatch.setenv("HLEDGER_TUI_COMMODITY", "")
+
+        # Import and reload modules to pick up new config
+        import importlib
+
+        from hledger_tui import config as config_module
+
+        importlib.reload(config_module)
+        from hledger_tui.core import models as models_module
+
+        importlib.reload(models_module)
+        from hledger_tui.core import service as service_module
+
+        importlib.reload(service_module)
+
+        from conftest import MockHLedgerBackend
+
+        mock_backend = MockHLedgerBackend()
+        hledger = service_module.HLedger(backend=mock_backend)
+
+        hledger.balance()
+
+        queries, kwargs = mock_backend.balance_calls[0]
+        assert "market" in kwargs
+        assert kwargs["market"] is True
+        assert "exchange" not in kwargs
+
+    def test_set_commodity_uses_exchange_conversion(self, monkeypatch):
+        """Test that set commodity uses --exchange flag."""
+        monkeypatch.setenv("HLEDGER_TUI_COMMODITY", "€")
+
+        # Import and reload modules to pick up new config
+        import importlib
+
+        from hledger_tui import config as config_module
+
+        importlib.reload(config_module)
+        from hledger_tui.core import models as models_module
+
+        importlib.reload(models_module)
+        from hledger_tui.core import service as service_module
+
+        importlib.reload(service_module)
+
+        from conftest import MockHLedgerBackend
+
+        mock_backend = MockHLedgerBackend()
+        hledger = service_module.HLedger(backend=mock_backend)
+
+        hledger.balance()
+
+        queries, kwargs = mock_backend.balance_calls[0]
+        assert "exchange" in kwargs
+        assert kwargs["exchange"] == "€"
+        assert "market" not in kwargs
+
+    def test_invalid_commodity_raises_error(self, monkeypatch):
+        """Test that invalid commodity raises ValueError."""
+        import pytest
+
+        monkeypatch.setenv("HLEDGER_TUI_COMMODITY", "INVALID")
+
+        # Import and reload modules to pick up new config
+        import importlib
+
+        from hledger_tui import config as config_module
+
+        importlib.reload(config_module)
+        from hledger_tui.core import models as models_module
+
+        importlib.reload(models_module)
+        from hledger_tui.core import service as service_module
+
+        importlib.reload(service_module)
+
+        from conftest import MockHLedgerBackend
+
+        mock_backend = MockHLedgerBackend()
+        hledger = service_module.HLedger(backend=mock_backend)
+
+        with pytest.raises(ValueError, match="not declared in journal"):
+            hledger.balance()
+
+    def test_currency_conversion_in_all_balance_methods(self, monkeypatch):
+        """Test that currency conversion is applied to all balance methods."""
+        monkeypatch.setenv("HLEDGER_TUI_COMMODITY", "$")
+
+        # Import and reload modules to pick up new config
+        import importlib
+
+        from hledger_tui import config as config_module
+
+        importlib.reload(config_module)
+        from hledger_tui.core import models as models_module
+
+        importlib.reload(models_module)
+        from hledger_tui.core import service as service_module
+
+        importlib.reload(service_module)
+
+        from conftest import MockHLedgerBackend
+
+        mock_backend = MockHLedgerBackend()
+        hledger = service_module.HLedger(backend=mock_backend)
+
+        # Test balance()
+        hledger.balance()
+        assert mock_backend.balance_calls[0][1]["exchange"] == "$"
+
+        # Test tag_balance()
+        hledger.tag_balance("test")
+        assert mock_backend.balance_calls[1][1]["exchange"] == "$"
+
+    def test_currency_conversion_in_register(self, monkeypatch):
+        """Test that currency conversion is applied to register method."""
+        monkeypatch.setenv("HLEDGER_TUI_COMMODITY", "£")
+
+        # Import and reload modules to pick up new config
+        import importlib
+
+        from hledger_tui import config as config_module
+
+        importlib.reload(config_module)
+        from hledger_tui.core import models as models_module
+
+        importlib.reload(models_module)
+        from hledger_tui.core import service as service_module
+
+        importlib.reload(service_module)
+
+        from conftest import MockHLedgerBackend
+
+        mock_backend = MockHLedgerBackend()
+        hledger = service_module.HLedger(backend=mock_backend)
+
+        hledger.register("expenses:food")
+
+        queries, kwargs = mock_backend.register_calls[0]
+        assert "exchange" in kwargs
+        assert kwargs["exchange"] == "£"
+
+    def test_declared_commodities_cached(self, monkeypatch):
+        """Test that declared commodities are cached after first validation."""
+        monkeypatch.setenv("HLEDGER_TUI_COMMODITY", "€")
+
+        # Import and reload modules to pick up new config
+        import importlib
+
+        from hledger_tui import config as config_module
+
+        importlib.reload(config_module)
+        from hledger_tui.core import models as models_module
+
+        importlib.reload(models_module)
+        from hledger_tui.core import service as service_module
+
+        importlib.reload(service_module)
+
+        from conftest import MockHLedgerBackend
+
+        mock_backend = MockHLedgerBackend()
+        hledger = service_module.HLedger(backend=mock_backend)
+
+        # First call should fetch commodities
+        hledger.balance()
+        first_commodity_calls = len(
+            [c for c in mock_backend.commodities_calls if c.get("declared")]
+        )
+
+        # Second call should use cache
+        hledger.balance()
+        second_commodity_calls = len(
+            [c for c in mock_backend.commodities_calls if c.get("declared")]
+        )
+
+        # Should only call once
+        assert first_commodity_calls == 1
+        assert second_commodity_calls == 1  # Still 1, not 2

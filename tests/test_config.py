@@ -51,7 +51,7 @@ class TestHLedgerConfigFromEnv:
         # Should use defaults
         assert "acct:expenses" in config.default_expenses_queries
         assert config.default_depth == 2
-        assert config.default_commodity == "€"
+        assert config.default_commodity == ""
 
     def test_config_from_env_strips_whitespace_from_queries(self, monkeypatch):
         """Test that query strings are properly stripped of whitespace."""
