@@ -471,7 +471,7 @@ class TestHLedgerExtraOptions:
 
     def test_balance_with_extra_options(self, hledger_with_mock, mock_backend, monkeypatch):
         """Test that extra balance options are passed to backend."""
-        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", "--cost --depth 5")
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", '["--cost", "--depth 5"]')
 
         # Reload config to pick up env var
         import importlib
@@ -496,7 +496,7 @@ class TestHLedgerExtraOptions:
 
     def test_register_with_extra_options(self, hledger_with_mock, mock_backend, monkeypatch):
         """Test that extra register options are passed to backend."""
-        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_REGISTER", "--related --cost")
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_REGISTER", '["--related", "--cost"]')
 
         # Reload config to pick up env var
         import importlib
@@ -521,7 +521,7 @@ class TestHLedgerExtraOptions:
 
     def test_extra_options_override_defaults(self, hledger_with_mock, mock_backend, monkeypatch):
         """Test that extra options can override default settings."""
-        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", "--depth 10")
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", '["--depth=10"]')
 
         # Reload config to pick up env var
         import importlib
@@ -547,7 +547,7 @@ class TestHLedgerExtraOptions:
 
     def test_assets_with_extra_options(self, hledger_with_mock, mock_backend, monkeypatch):
         """Test that extra balance options are applied to assets method."""
-        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", "--cost")
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", '["--cost"]')
 
         # Reload config to pick up env var
         import importlib
@@ -573,7 +573,7 @@ class TestHLedgerExtraOptions:
         self, hledger_with_mock, mock_backend, monkeypatch
     ):
         """Test that extra balance options are applied to balance_over_time method."""
-        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", "--cost")
+        monkeypatch.setenv("HLEDGER_TUI_EXTRA_OPTIONS_BALANCE", '["--cost"]')
 
         # Reload config to pick up env var
         import importlib

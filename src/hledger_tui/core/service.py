@@ -93,13 +93,13 @@ class HLedger:
     with support for periods, depth filtering, and multiple query types.
     """
 
-    DEFAULT_DEPTH_MIN: Final[int] = config.default_depth_min
-    DEFAULT_DEPTH: Final[int] = config.default_depth
-    DEFAULT_DEPTH_MAX: Final[int] = config.default_depth_max
+    DEFAULT_DEPTH_MIN: Final[int] = 1
+    DEFAULT_DEPTH: Final[int] = config.depth
+    DEFAULT_DEPTH_MAX: Final[int] = 4
     DEFAULT_PERIOD: Final[HLedgerPeriod] = HLedgerPeriod()
-    DEFAULT_HLEDGER_QUERIES: ClassVar[List[str]] = config.default_expenses_queries
-    DEFAULT_HLEDGER_TAG_QUERIES: ClassVar[List[str]] = config.default_tag_queries
-    DEFAULT_HLEDGER_ASSETS_QUERIES: ClassVar[List[str]] = config.default_assets_queries
+    DEFAULT_HLEDGER_QUERIES: ClassVar[List[str]] = config.queries.expenses
+    DEFAULT_HLEDGER_TAG_QUERIES: ClassVar[List[str]] = config.queries.tags
+    DEFAULT_HLEDGER_ASSETS_QUERIES: ClassVar[List[str]] = config.queries.assets
 
     queries: List[str]  # Series of HLedger queries
     depth: int  # The --depth to use in HLedger commands
@@ -134,6 +134,11 @@ class HLedger:
         - Boolean flags (no value): set to True
         - Key-value pairs: extract value
 
+        Supports multiple input formats:
+        - Separate elements: ['--depth', '3']
+        - Combined with equals: ['--depth=3']
+        - Combined with space: ['--depth 3']
+
         Args:
             options: List of command-line arguments (e.g., ['--cost', '--depth', '3'])
 
@@ -143,32 +148,47 @@ class HLedger:
         Examples:
             ['--cost'] -> {'cost': True}
             ['--depth', '3'] -> {'depth': '3'}
+            ['--depth=3'] -> {'depth': '3'}
+            ['--depth 3'] -> {'depth': '3'}
             ['--no-total'] -> {'no_total': True}
         """
         kwargs = {}
         i = 0
         while i < len(options):
             arg = options[i]
-            if arg.startswith("--"):
-                # Remove '--' prefix and convert dashes to underscores
-                key = arg[2:].replace("-", "_")
-                # Check if next item is a value (doesn't start with --)
-                if i + 1 < len(options) and not options[i + 1].startswith("--"):
-                    kwargs[key] = options[i + 1]
-                    i += 2
-                else:
-                    # Boolean flag
-                    kwargs[key] = True
+
+            # Handle options starting with -- or -
+            if arg.startswith("--") or arg.startswith("-"):
+                # Check if the option contains an equals sign (e.g., --depth=5)
+                if "=" in arg:
+                    prefix_len = 2 if arg.startswith("--") else 1
+                    key_value = arg[prefix_len:]
+                    key, value = key_value.split("=", 1)
+                    key = key.replace("-", "_")
+                    kwargs[key] = value
                     i += 1
-            elif arg.startswith("-"):
-                # Single dash short option (e.g., -V)
-                key = arg[1:]
-                if i + 1 < len(options) and not options[i + 1].startswith("-"):
-                    kwargs[key] = options[i + 1]
-                    i += 2
-                else:
-                    kwargs[key] = True
+                # Check if the option contains a space (e.g., "--depth 5" as single string)
+                elif " " in arg:
+                    prefix_len = 2 if arg.startswith("--") else 1
+                    key_value = arg[prefix_len:]
+                    parts = key_value.split(" ", 1)
+                    key = parts[0].replace("-", "_")
+                    value = parts[1] if len(parts) > 1 else True
+                    kwargs[key] = value
                     i += 1
+                else:
+                    # Standard format: option possibly followed by value in next element
+                    prefix_len = 2 if arg.startswith("--") else 1
+                    key = arg[prefix_len:].replace("-", "_")
+
+                    # Check if next item is a value (doesn't start with - or --)
+                    if i + 1 < len(options) and not options[i + 1].startswith("-"):
+                        kwargs[key] = options[i + 1]
+                        i += 2
+                    else:
+                        # Boolean flag
+                        kwargs[key] = True
+                        i += 1
             else:
                 # Skip non-option arguments
                 i += 1
@@ -184,7 +204,7 @@ class HLedger:
         Raises:
             ValueError: If configured commodity is not declared in journal
         """
-        commodity = config.default_commodity
+        commodity = config.commodity
         if not commodity:
             # Use market conversion when no commodity specified
             return {"market": True}
@@ -235,7 +255,7 @@ class HLedger:
             hledger_args["period"] = self.period.value
 
         # Apply extra options (these can override defaults per "last wins" behavior)
-        extra_kwargs = self._parse_extra_options(config.extra_balance_options)
+        extra_kwargs = self._parse_extra_options(config.extra_options.balance)
         hledger_args.update(extra_kwargs)
 
         raw_balances = self.backend.balance(queries or self.queries, **hledger_args, **kwargs)
@@ -290,7 +310,7 @@ class HLedger:
             hledger_args["period"] = self.period.value
 
         # Apply extra options (these can override defaults per "last wins" behavior)
-        extra_kwargs = self._parse_extra_options(config.extra_balance_options)
+        extra_kwargs = self._parse_extra_options(config.extra_options.balance)
         hledger_args.update(extra_kwargs)
 
         raw_balances = self.backend.balance(queries or self.queries, **hledger_args, **kwargs)
@@ -320,7 +340,7 @@ class HLedger:
             **self._get_currency_conversion_kwargs(),
         }
         # Apply extra options (these can override defaults per "last wins" behavior)
-        extra_kwargs = self._parse_extra_options(config.extra_balance_options)
+        extra_kwargs = self._parse_extra_options(config.extra_options.balance)
         hledger_args.update(extra_kwargs)
 
         raw_balances = self.backend.balance(
@@ -373,7 +393,7 @@ class HLedger:
             hledger_args["period"] = self.period.value
 
         # Apply extra options (these can override defaults per "last wins" behavior)
-        extra_kwargs = self._parse_extra_options(config.extra_balance_options)
+        extra_kwargs = self._parse_extra_options(config.extra_options.balance)
         hledger_args.update(extra_kwargs)
 
         raw_balances = self.backend.balance([account], **hledger_args, **kwargs)
@@ -487,7 +507,7 @@ class HLedger:
             hledger_args["period"] = period_to_use
 
         # Apply extra options (these can override defaults per "last wins" behavior)
-        extra_kwargs = self._parse_extra_options(config.extra_register_options)
+        extra_kwargs = self._parse_extra_options(config.extra_options.register)
         hledger_args.update(extra_kwargs)
 
         # Build query list

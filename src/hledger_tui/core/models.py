@@ -1,9 +1,8 @@
 """Data models for HLedger TUI application."""
 
 from dataclasses import dataclass
-from typing import ClassVar, List
+from typing import ClassVar, List, Optional
 
-from hledger_tui.config import config
 from hledger_tui.core.parser import CommodityParser
 
 
@@ -11,15 +10,13 @@ from hledger_tui.core.parser import CommodityParser
 class CategoricalBalance:
     """Balance data point with a category name and amount including currency."""
 
-    DEFAULT_COMMODITY: ClassVar[str] = config.default_commodity
+    DEFAULT_COMMODITY: ClassVar[Optional[str]] = None
 
     name: str
     _balance: str
 
     @property
     def balance(self) -> str:
-        if self._balance == "0" and self.DEFAULT_COMMODITY:
-            return f"{self.DEFAULT_COMMODITY} 0"
         return self._balance
 
     @property
@@ -33,10 +30,10 @@ class CategoricalBalance:
         """
         try:
             parsed = CommodityParser.parse(self.balance)
-            return parsed.commodity if parsed.commodity else self.DEFAULT_COMMODITY
+            return parsed.commodity if parsed.commodity else ""
         except ValueError:
             # Fallback to default if parsing fails
-            return self.DEFAULT_COMMODITY
+            return ""
 
     @property
     def balance_float(self) -> float:
