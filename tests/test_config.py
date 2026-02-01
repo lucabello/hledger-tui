@@ -40,12 +40,16 @@ class TestHLedgerConfigFromEnv:
 
         assert config.commodity == "$"
 
-    def test_config_from_env_with_no_env_vars(self, monkeypatch):
+    def test_config_from_env_with_no_env_vars(self, monkeypatch, tmp_path):
         """Test that from_env() uses defaults when no environment variables are set."""
         # Clear any relevant env vars
         monkeypatch.delenv("HLEDGER_TUI_QUERIES_EXPENSES", raising=False)
         monkeypatch.delenv("HLEDGER_TUI_DEPTH", raising=False)
         monkeypatch.delenv("HLEDGER_TUI_COMMODITY", raising=False)
+        
+        # Point config to a non-existent directory to prevent loading user's config file
+        monkeypatch.setenv("HOME", str(tmp_path))
+        monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / ".config"))
 
         config = HLedgerConfig.from_env()
 
