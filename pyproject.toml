@@ -1,12 +1,12 @@
 [project]
 name = "hledger-tui"
 version = "0.1.0"
-license-files = ["LICENSE"]
+description = "A Textual TUI to view HLedger data."
 authors = [
     {name = "Luca Bello", email = "lusgabello@gmail.com"},
 ]
-description = "A Textual TUI to view HLedger data."
 readme = "README.md"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = [
   "textual",
@@ -17,24 +17,28 @@ dependencies = [
   "dataconfy",
 ]
 
-[project.urls]
-Homepage = "https://github.com/lucabello/hledger-tui"
-Repository = "https://github.com/lucabello/hledger-tui"
-Issues = "https://github.com/lucabello/hledger-tui/issues"
-
-[project.scripts]
-hledger-tui = "hledger_tui.app:cli"
-
 [dependency-groups]
 dev = [
-    "pyright",
     "ruff",
-    "textual-dev",
+    "pyright",
+    "codespell",
+    "vulture",
     "pytest",
     "pytest-cov",
-    "vulture",
+    "pytest-sugar",
+    "actionlint-py",
+    "uv-secure",
 ]
 
+[project.urls]
+Homepage = "https://github.com/lucabello/hledger-tui"
+Documentation = "https://github.com/lucabello/hledger-tui"
+Repository = "https://github.com/lucabello/hledger-tui"
+Issues = "https://github.com/lucabello/hledger-tui/issues"
+Changelog = "https://github.com/lucabello/hledger-tui/releases"
+
+
+# Building and publishing
 [build-system]
 requires = ["uv_build>=0.9.2,<0.10.0"]
 build-backend = "uv_build"
@@ -45,8 +49,17 @@ url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
 explicit = true
 
+# Tools configuration
 [tool.ruff]
 line-length = 99
 
-[lint.pydocstyle]
+[tool.lint.pydocstyle]
 convention = "google"
+
+[tool.codespell]
+skip = ".git,build,venv*"
+ignore-words-list = "assertIn"
+
+[tool.vulture]
+min_confidence = 80
+ignore_names = ["parameters"]
