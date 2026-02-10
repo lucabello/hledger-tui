@@ -46,7 +46,7 @@ class TestHLedgerConfigFromEnv:
         monkeypatch.delenv("HLEDGER_TUI_QUERIES_EXPENSES", raising=False)
         monkeypatch.delenv("HLEDGER_TUI_DEPTH", raising=False)
         monkeypatch.delenv("HLEDGER_TUI_COMMODITY", raising=False)
-        
+
         # Point config to a non-existent directory to prevent loading user's config file
         monkeypatch.setenv("HOME", str(tmp_path))
         monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / ".config"))
