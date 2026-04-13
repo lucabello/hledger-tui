@@ -37,6 +37,8 @@ Repository = "https://github.com/lucabello/hledger-tui"
 Issues = "https://github.com/lucabello/hledger-tui/issues"
 Changelog = "https://github.com/lucabello/hledger-tui/releases"
 
+[project.scripts]
+hledger-tui = "hledger_tui.__main__:cli"
 
 # Building and publishing
 [build-system]
