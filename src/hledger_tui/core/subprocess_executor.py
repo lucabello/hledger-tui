@@ -148,10 +148,14 @@ class SubprocessExecutor:
 
         # Run command
         try:
+            # On Windows with hledger, use UTF-8 encoding explicitly
+            encoding = "utf-8" if sys.platform == "win32" and "hledger" in str(cmd_list) else None
+
             result = subprocess.run(
                 cmd_list,
                 capture_output=capture_output,
                 text=text,
+                encoding=encoding,
                 check=False,  # We'll check manually for better error messages
                 env=process_env,
             )
