@@ -1,11 +1,11 @@
 """Tests for subprocess executor."""
 
-import subprocess
 import os
+
 from hledger_tui.core.subprocess_executor import (
-    SubprocessExecutor,
-    HLedgerCommand,
     CommandError,
+    HLedgerCommand,
+    SubprocessExecutor,
 )
 
 
@@ -29,7 +29,7 @@ def test_command_error_on_failure():
     executor = SubprocessExecutor()
     try:
         # This command should fail on most systems
-        if os.name == 'nt':
+        if os.name == "nt":
             executor.run("cmd", "/c", "exit", "1", check=True)
         else:
             executor.run("false", check=True)

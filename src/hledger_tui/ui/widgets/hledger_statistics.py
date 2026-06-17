@@ -194,8 +194,8 @@ class HLedgerStatistics(Widget):
             days: If specified, only count transactions from the last N days.
         """
         try:
-            from datetime import datetime, timedelta
             import subprocess
+            from datetime import datetime, timedelta
 
             # Get all transactions with their status
             # Unmarked transactions don't have ! or * status

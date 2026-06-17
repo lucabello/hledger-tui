@@ -8,7 +8,6 @@ from io import StringIO
 from typing import ClassVar, Final, List, Optional
 
 from hledger_tui.config import config
-from hledger_tui.core.subprocess_executor import SubprocessExecutor, HLedgerCommand
 from hledger_tui.core.models import (
     AccountHistoricalBalance,
     CategoricalBalance,
@@ -16,6 +15,7 @@ from hledger_tui.core.models import (
     Transaction,
 )
 from hledger_tui.core.period import HLedgerPeriod
+from hledger_tui.core.subprocess_executor import HLedgerCommand, SubprocessExecutor
 
 
 class HLedgerBackend(ABC):
