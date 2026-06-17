@@ -5,7 +5,6 @@ Provides a sh-like API using subprocess module for Windows compatibility.
 
 import subprocess
 import sys
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 
@@ -35,7 +34,19 @@ class SubprocessExecutor:
         Args:
             env: Optional environment variables to pass to subprocess
         """
+        import os
+
         self.env = env or {}
+        # Set UTF-8 encoding for hledger by default
+        if "HLEDGER_ENCODING" not in os.environ:
+            self.env["HLEDGER_ENCODING"] = "UTF-8"
+        # Set locale for Windows
+        if sys.platform == "win32":
+            self.env["PYTHONIOENCODING"] = "utf-8"
+            if "LC_ALL" not in os.environ:
+                self.env["LC_ALL"] = "C.UTF-8"
+            if "LANG" not in os.environ:
+                self.env["LANG"] = "C.UTF-8"
 
     def _kwargs_to_args(self, kwargs: Dict[str, Any]) -> List[str]:
         """Convert keyword arguments to command-line arguments.
@@ -129,6 +140,12 @@ class SubprocessExecutor:
 
             process_env = {**os.environ, **self.env}
 
+        # On Windows, wrap command to set UTF-8 code page for hledger
+        if sys.platform == "win32" and cmd_list and "hledger" in cmd_list[0].lower():
+            # Use PowerShell to set UTF-8 code page before running command
+            ps_command = f"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; chcp 65001 | Out-Null; & {' '.join(map(self._escape_ps_arg, cmd_list))}"
+            cmd_list = ["powershell", "-NoProfile", "-Command", ps_command]
+
         # Run command
         try:
             result = subprocess.run(
@@ -154,6 +171,20 @@ class SubprocessExecutor:
             )
 
         return result
+
+    @staticmethod
+    def _escape_ps_arg(arg: str) -> str:
+        """Escape argument for PowerShell.
+
+        Args:
+            arg: Argument to escape
+
+        Returns:
+            Escaped argument string
+        """
+        if '"' in arg or " " in arg:
+            return f'"{arg.replace('"', '\\"')}"'
+        return arg
 
     def __call__(
         self,
