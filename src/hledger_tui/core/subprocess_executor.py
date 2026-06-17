@@ -187,7 +187,8 @@ class SubprocessExecutor:
             Escaped argument string
         """
         if '"' in arg or " " in arg:
-            return f'"{arg.replace('"', '\\"')}"'
+            escaped = arg.replace('"', '\\"')
+            return f'"{escaped}"'
         return arg
 
     def __call__(
