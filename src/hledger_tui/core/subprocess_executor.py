@@ -180,16 +180,19 @@ class SubprocessExecutor:
     def _escape_ps_arg(arg: str) -> str:
         """Escape argument for PowerShell.
 
+        Uses single quotes for proper escaping. All characters are literal
+        within single quotes, except single quotes which are escaped by
+        doubling (''). This handles special characters like $, `, @, &, etc.
+
         Args:
             arg: Argument to escape
 
         Returns:
             Escaped argument string
         """
-        if '"' in arg or " " in arg:
-            escaped = arg.replace('"', '\\"')
-            return f'"{escaped}"'
-        return arg
+        # Single quotes make everything literal, except single quotes themselves
+        # which are escaped by doubling ('')
+        return "'" + arg.replace("'", "''") + "'"
 
     def __call__(
         self,

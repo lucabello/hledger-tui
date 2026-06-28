@@ -8,6 +8,8 @@ from textual.widget import Widget
 from textual.widgets import Static
 from typing_extensions import override
 
+from hledger_tui.core.subprocess_executor import SubprocessExecutor
+
 
 class HLedgerStatistics(Widget):
     DEFAULT_CSS = """
@@ -40,6 +42,7 @@ class HLedgerStatistics(Widget):
             id=id,
             classes=classes,
         )
+        self.executor = SubprocessExecutor()
 
     @override
     def compose(self) -> ComposeResult:
@@ -194,7 +197,6 @@ class HLedgerStatistics(Widget):
             days: If specified, only count transactions from the last N days.
         """
         try:
-            import subprocess
             from datetime import datetime, timedelta
 
             # Get all transactions with their status
@@ -206,10 +208,8 @@ class HLedgerStatistics(Widget):
                 start_date = end_date - timedelta(days=days)
                 cmd.extend(["--begin", start_date.strftime("%Y-%m-%d")])
 
-            result = subprocess.run(
+            result = self.executor.run(
                 cmd,
-                capture_output=True,
-                text=True,
                 check=False,
             )
 
