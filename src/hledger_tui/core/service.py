@@ -7,8 +7,6 @@ from datetime import datetime, timedelta
 from io import StringIO
 from typing import ClassVar, Final, List, Optional
 
-import sh
-
 from hledger_tui.config import config
 from hledger_tui.core.models import (
     AccountHistoricalBalance,
@@ -17,6 +15,7 @@ from hledger_tui.core.models import (
     Transaction,
 )
 from hledger_tui.core.period import HLedgerPeriod
+from hledger_tui.core.subprocess_executor import HLedgerCommand, SubprocessExecutor
 
 
 class HLedgerBackend(ABC):
@@ -62,28 +61,40 @@ class HLedgerBackend(ABC):
 
 
 class ShellHLedgerBackend(HLedgerBackend):
-    """HLedger backend implementation using shell command execution via sh library."""
+    """HLedger backend implementation using subprocess for cross-platform support."""
+
+    def __init__(self):
+        """Initialize the backend with a subprocess executor."""
+        self.executor = SubprocessExecutor()
+        self.hledger = HLedgerCommand(self.executor)
 
     def balance(self, queries: List[str], **kwargs) -> str:
-        return sh.hledger.balance(queries, **kwargs)  # pyright: ignore
+        """Execute 'hledger balance' and return raw output."""
+        return self.hledger.balance(queries, **kwargs)
 
     def register(self, queries: List[str], **kwargs) -> str:
-        return sh.hledger.register(queries, **kwargs)  # pyright: ignore
+        """Execute 'hledger register' and return raw output."""
+        return self.hledger.register(queries, **kwargs)
 
     def stats(self) -> str:
-        return sh.hledger.stats(_tty_out=False).strip()  # pyright: ignore
+        """Execute 'hledger stats' and return raw output."""
+        return self.hledger.stats(_tty_out=False).strip()
 
     def files(self) -> str:
-        return sh.hledger.files(_tty_out=False).strip()  # pyright: ignore
+        """Execute 'hledger files' and return raw output."""
+        return self.hledger.files(_tty_out=False).strip()
 
     def accounts(self, queries: List[str]) -> str:
-        return sh.hledger.accounts(queries)  # pyright: ignore
+        """Execute 'hledger accounts' and return raw output."""
+        return self.hledger.accounts(queries)
 
     def tags(self, **kwargs) -> str:
-        return sh.hledger.tags(**kwargs)  # pyright: ignore
+        """Execute 'hledger tags' and return raw output."""
+        return self.hledger.tags(**kwargs)
 
     def commodities(self, **kwargs) -> str:
-        return sh.hledger.commodities(_tty_out=False, **kwargs).strip()  # pyright: ignore
+        """Execute 'hledger commodities' and return raw output."""
+        return self.hledger.commodities(_tty_out=False, **kwargs).strip()
 
 
 class HLedger:

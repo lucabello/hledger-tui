@@ -194,20 +194,29 @@ class HLedgerStatistics(Widget):
             days: If specified, only count transactions from the last N days.
         """
         try:
+            import subprocess
             from datetime import datetime, timedelta
-
-            import sh
 
             # Get all transactions with their status
             # Unmarked transactions don't have ! or * status
-            args = []
+            cmd = ["hledger", "print"]
             if days is not None:
                 # Calculate the date range
                 end_date = datetime.now()
                 start_date = end_date - timedelta(days=days)
-                args.extend(["--begin", start_date.strftime("%Y-%m-%d")])
+                cmd.extend(["--begin", start_date.strftime("%Y-%m-%d")])
 
-            output = sh.hledger.print(*args, _tty_out=False)  # pyright: ignore
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            if result.returncode != 0:
+                return None
+
+            output = result.stdout
             lines = output.split("\n")
 
             unmarked = 0

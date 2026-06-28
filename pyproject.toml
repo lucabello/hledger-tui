@@ -12,7 +12,6 @@ dependencies = [
   "textual",
   "textual-dev",
   "textual-plotext",
-  "sh",
   "typer",
   "dataconfy",
 ]
